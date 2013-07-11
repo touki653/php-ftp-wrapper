@@ -1,0 +1,17 @@
+{
+    "name": "touki/ftp-wrapper",
+    "description": "A Wrapper class for PHP FTP functions",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Touki",
+            "email": "g.vincendon@vithemis.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "autoload": {
+        "psr-0": { "Touki\\FTP": "src/" }
+    },
+}
