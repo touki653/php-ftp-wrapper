@@ -1,6 +1,6 @@
 {
     "name": "touki/ftp-wrapper",
-    "description": "A Wrapper class for PHP FTP functions",
+    "description": "A fully object oriented library for PHP (S)FTP functions",
     "license": "MIT",
     "authors": [
         {
