@@ -12,6 +12,8 @@
         "php": ">=5.3.2"
     },
     "autoload": {
-        "psr-0": { "Touki\\FTP": "src/" }
-    },
+        "psr-0": {
+            "Touki\\FTP": [ "lib/", "tests/" ]
+        }
+    }
 }
