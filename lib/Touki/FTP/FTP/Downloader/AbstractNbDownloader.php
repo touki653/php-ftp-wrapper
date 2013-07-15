@@ -1,15 +1,15 @@
 <?php
 
-namespace Touki\FTP\FTP\Uploader;
+namespace Touki\FTP\FTP\Downloader;
 
 use Touki\FTP\FTPWrapper;
 
 /**
- * Base class for non blocking uploaders
+ * Base class for non blocking downloaders
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-abstract class AbstractNbUploader extends AbstractUploader
+abstract class AbstractNbDownloader extends AbstractDownloader
 {
     /**
      * Callback
@@ -21,9 +21,9 @@ abstract class AbstractNbUploader extends AbstractUploader
      * Constructor
      *
      * @param FTPWrapper $ftp      A FTP Wrapper instance
-     * @param callable   $callback A callback to be called during upload
+     * @param callable   $callback A callback to be called during download
      * @param integer    $mode     Transfer mode
-     * @param integer    $startPos The position in the remote file to start uploading to
+     * @param integer    $startPos The position in the remote file to start downloading to
      */
     public function __construct(FTPWrapper $ftp, $callback, $mode, $startPos)
     {

@@ -25,12 +25,6 @@ class FileUploader extends AbstractUploader
             throw new \InvalidArgumentException(sprintf("File %s is not readable", $local));
         }
 
-        $path = dirname($remoteFile);
-        $name = basename($remoteFile);
-
-        $this->ftp->pasv(true);
-        $this->ftp->chdir($path);
-
-        return $this->ftp->put($name, $local, $this->mode, $this->startPos);
+        return $this->ftp->put($remoteFile, $local, $this->mode, $this->startPos);
     }
 }

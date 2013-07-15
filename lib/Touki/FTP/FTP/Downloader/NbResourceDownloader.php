@@ -1,22 +1,22 @@
 <?php
 
-namespace Touki\FTP\FTP\Uploader;
+namespace Touki\FTP\FTP\Downloader;
 
 use Touki\FTP\FTPWrapper;
 
 /**
- * Non Blocking Resource Uploader
+ * Non Blocking Resource Downloader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbResourceUploader extends AbstractNbUploader
+class NbResourceDownloader extends AbstractNbDownloader
 {
     /**
      * {@inheritDoc}
      *
      * @throws InvalidArgumentException When $local is not a resource
      */
-    public function upload($remoteFile, $local)
+    public function download($local, $remoteFile)
     {
         if (!is_resource($local)) {
             throw new \InvalidArgumentException(
@@ -27,7 +27,7 @@ class NbResourceUploader extends AbstractNbUploader
         $callback = $this->getCallback();
         $this->ftp->pasv(true);
 
-        $state = $this->ftp->fputNb($remoteFile, $local, $this->mode, $this->startPos);
+        $state = $this->ftp->fgetNb($local, $remoteFile, $this->mode, $this->startPos);
         call_user_func_array($callback, array());
 
         while ($state == FTPWrapper::MOREDATA) {

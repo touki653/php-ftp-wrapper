@@ -3,7 +3,6 @@
 namespace Touki\FTP\Tests\Connection;
 
 use Touki\FTP\Connection\Connection;
-use Touki\FTP\Tests\ConnectionAwareTestCase;
 
 /**
  * Connection TestCase
@@ -35,6 +34,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         try {
             $connection->open();
             $this->assertTrue($connection->isConnected());
+
             return $connection;
         } catch (\Exception $e) {
             $this->markTestSkipped();

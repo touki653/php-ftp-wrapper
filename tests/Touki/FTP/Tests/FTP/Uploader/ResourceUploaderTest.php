@@ -3,15 +3,15 @@
 namespace Touki\FTP\Tests\FTP\Uploader;
 
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\FTP\Uploader\FileUploader;
+use Touki\FTP\FTP\Uploader\ResourceUploader;
 use Touki\FTP\Tests\ConnectionAwareTestCase;
 
 /**
- * File uploader Test case
+ * Resource uploader Test case
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FileUploaderTest extends ConnectionAwareTestCase
+class ResourceUploaderTest extends ConnectionAwareTestCase
 {
     public function setUp()
     {
@@ -19,14 +19,14 @@ class FileUploaderTest extends ConnectionAwareTestCase
 
         $connection     = self::$connection;
         $this->ftp      = new FTPWrapper($connection);
-        $this->uploader = new FileUploader($this->ftp, FTPWrapper::BINARY, 0);
+        $this->uploader = new ResourceUploader($this->ftp, FTPWrapper::BINARY, 0);
     }
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage File /local/path/to/foo does not exist
+     * @expectedExceptionMessage Invalid local resource given. Expected resource, got string
      */
-    public function testUploadNonExistantFile()
+    public function testUploadNonResourceArgument()
     {
         $this->uploader->upload('/remote/file', '/local/path/to/foo');
     }
@@ -34,20 +34,24 @@ class FileUploaderTest extends ConnectionAwareTestCase
     public function testUploadSuccessful()
     {
         $remoteFile = basename(__FILE__);
+        $localFile = fopen(__FILE__, 'r');
 
-        $this->assertTrue($this->uploader->upload($remoteFile, __FILE__));
+        $this->assertTrue($this->uploader->upload($remoteFile, $localFile));
         $this->assertGreaterThan(-1, $this->ftp->size($remoteFile), 'Upload failed');
 
         $this->ftp->delete($remoteFile);
+        fclose($localFile);
     }
 
     public function testUploadSuccessfulOnDeepFolder()
     {
         $remoteFile = sprintf("/folder/%s", basename(__FILE__));
+        $localFile = fopen(__FILE__, 'r');
 
-        $this->assertTrue($this->uploader->upload($remoteFile, __FILE__));
+        $this->assertTrue($this->uploader->upload($remoteFile, $localFile));
         $this->assertGreaterThan(-1, $this->ftp->size($remoteFile), 'Upload failed');
 
         $this->ftp->delete($remoteFile);
+        fclose($localFile);
     }
 }

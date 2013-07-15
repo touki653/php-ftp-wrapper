@@ -35,6 +35,8 @@ class UploaderDeciderTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Touki\FTP\FTP\Uploader\ResourceUploader', $uploader);
         $this->assertSame($uploader->getMode(), FTPWrapper::ASCII);
         $this->assertSame($uploader->getStartPos(), 0);
+
+        fclose($local);
     }
 
     public function testDecideFileUploader()
@@ -66,6 +68,8 @@ class UploaderDeciderTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Touki\FTP\FTP\Uploader\NbResourceUploader', $uploader);
         $this->assertSame($uploader->getMode(), FTPWrapper::BINARY);
         $this->assertSame($uploader->getStartPos(), 15);
+
+        fclose($local);
     }
 
     public function testDecideNonBlockingFileUploader()

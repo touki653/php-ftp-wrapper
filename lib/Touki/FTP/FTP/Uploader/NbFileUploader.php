@@ -2,6 +2,8 @@
 
 namespace Touki\FTP\FTP\Uploader;
 
+use Touki\FTP\FTPWrapper;
+
 /**
  * Non Blocking File Uploader
  *
@@ -24,5 +26,19 @@ class NbFileUploader extends AbstractNbUploader
         if (!is_readable($local)) {
             throw new \InvalidArgumentException(sprintf("file %s is not readable", $local));
         }
+
+        $callback = $this->getCallback();
+        $this->ftp->pasv(true);
+
+        $state = $this->ftp->putNb($remoteFile, $local, $this->mode, $this->startPos);
+        call_user_func_array($callback, array());
+
+        while ($state == FTPWrapper::MOREDATA) {
+            $state = $this->ftp->nbContinue();
+
+            call_user_func_array($callback, array());
+        }
+
+        return $state === FTPWrapper::FINISHED;
     }
 }

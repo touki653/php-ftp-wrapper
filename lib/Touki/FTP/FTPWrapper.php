@@ -113,7 +113,7 @@ class FTPWrapper
      */
     public function fgetNb($handle, $remoteFile, $mode = self::BINARY, $resumepos = 0)
     {
-        return ftp_nb_fget($this->connection->getStream(), $remoteFile, $mode, $resumepos);
+        return ftp_nb_fget($this->connection->getStream(), $handle, $remoteFile, $mode, $resumepos);
     }
 
     /**
@@ -292,7 +292,7 @@ class FTPWrapper
      */
     public function pwd()
     {
-        return ftp_pwd($this->conncetion->getStream());
+        return ftp_pwd($this->connection->getStream());
     }
 
     /**

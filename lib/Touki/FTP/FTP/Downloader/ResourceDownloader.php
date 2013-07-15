@@ -1,20 +1,20 @@
 <?php
 
-namespace Touki\FTP\FTP\Uploader;
+namespace Touki\FTP\FTP\Downloader;
 
 /**
- * Resource Uploader
+ * Resource Downloader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class ResourceUploader extends AbstractUploader
+class ResourceDownloader extends AbstractDownloader
 {
     /**
      * {@inheritDoc}
      *
      * @throws InvalidArgumentException When $local is not a resource
      */
-    public function upload($remoteFile, $local)
+    public function download($local, $remoteFile)
     {
         if (!is_resource($local)) {
             throw new \InvalidArgumentException(
@@ -24,6 +24,6 @@ class ResourceUploader extends AbstractUploader
 
         $this->ftp->pasv(true);
 
-        return $this->ftp->fput($remoteFile, $local, $this->mode, $this->startPos);
+        return $this->ftp->fget($local, $remoteFile, $this->mode, $this->startPos);
     }
 }
