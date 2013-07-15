@@ -89,15 +89,15 @@ class Connection implements ConnectionInterface
             throw new ConnectionEstablishedException;
         }
 
-        $stream = @ftp_connect($this->host, $this->port, $this->timeout);
+        $stream = @ftp_connect($this->getHost(), $this->getPort(), $this->getTimeout());
 
         if (false === $stream) {
-            throw new ConnectionException(sprintf("Could not connect to server %s:%s", $this->host, $this->port));
+            throw new ConnectionException(sprintf("Could not connect to server %s:%s", $this->getHost(), $this->getPort()));
         }
 
-        if (!@ftp_login($stream, $this->username, $this->password)) {
+        if (!@ftp_login($stream, $this->getUsername(), $this->getPassword())) {
             throw new ConnectionException(
-                sprintf("Invalid combination of username (%s) and password (%s)", $this->username, $this->password)
+                sprintf("Invalid combination of username (%s) and password (%s)", $this->getUsername(), $this->getPassword())
             );
         }
 
