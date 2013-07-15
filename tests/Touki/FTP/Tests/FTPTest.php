@@ -19,11 +19,28 @@ class FTPTest extends ConnectionAwareTestCase
     public function testExistsNonExistingFile()
     {
         $this->assertFalse($this->ftp->fileExists('bar.txt'));
+        $this->assertFalse($this->ftp->fileExists('folder'));
     }
 
     public function testExistsExistingFile()
     {
         $this->assertTrue($this->ftp->fileExists('file1.txt'));
+    }
+
+    public function testDirectoryExistsFilesGiven()
+    {
+        $this->assertFalse($this->ftp->directoryExists('file1.txt'));
+        $this->assertFalse($this->ftp->directoryExists('folder/file2.txt'));
+    }
+
+    public function testDirectoryExistsSuccessful()
+    {
+        $this->assertTrue($this->ftp->directoryExists('folder'));
+    }
+
+    public function testDirectoryExistsOnDeepDirectory()
+    {
+        $this->assertTrue($this->ftp->directoryExists('folder/subfolder'));
     }
 
     /**
@@ -122,4 +139,29 @@ class FTPTest extends ConnectionAwareTestCase
         $this->ftp->cdup();
         $this->assertEquals("/", $this->wrapper->pwd());
     }
+
+    /**
+     * @expectedException Touki\FTP\Exception\DirectoryException
+     */
+    public function testMkdirErrorsConvertsToException()
+    {
+        $this->ftp->mkdir("/folder");
+    }
+
+    public function testMkdirSuccessful()
+    {
+        $this->assertTrue($this->ftp->mkdir("/folder2"));
+
+        $this->wrapper->rmdir("/folder2");
+    }
+
+    public function testMkdirDeepSuccessful()
+    {
+        $this->assertTrue($this->ftp->mkdir("/deep/nested/folder"));
+
+        $this->wrapper->rmdir("/deep/nested/folder");
+        $this->wrapper->rmdir("/deep/nested");
+        $this->wrapper->rmdir("/deep");
+    }
+
 }

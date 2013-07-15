@@ -46,6 +46,14 @@ interface FTPInterface
     public function fileExists($remoteFile);
 
     /**
+     * Checks if a directory exists
+     *
+     * @param  string  $directory Directory name
+     * @return boolean TRUE if it exists, FALSE when it doesn't
+     */
+    public function directoryExists($directory);
+
+    /**
      * Changes the current working directory
      *
      * @param  string  $directory Target directory
@@ -61,4 +69,12 @@ interface FTPInterface
      * @return boolean TRUE on success
      */
     public function cdup();
+
+    /**
+     * Creates a new directory
+     *
+     * @param  string  $directory The name of the directory to create
+     * @return boolean TRUE on success
+     */
+    public function mkdir($directory);
 }

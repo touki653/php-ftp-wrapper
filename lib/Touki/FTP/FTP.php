@@ -9,8 +9,6 @@ use Touki\FTP\FTP\UploaderInterface;
 use Touki\FTP\FTP\DownloaderDecider;
 use Touki\FTP\FTP\DownloaderDeciderInterface;
 use Touki\FTP\FTP\DownloaderInterface;
-use Touki\FTP\Exception\UploadException;
-use Touki\FTP\Exception\DownloadException;
 
 /**
  * FTP Class which implements standard behaviours of FTP
@@ -97,6 +95,24 @@ class FTP implements FTPInterface
     /**
      * {@inheritDoc}
      */
+    public function directoryExists($directory)
+    {
+        $this->setException('DirectoryException');
+        $this->handleErrors();
+
+        $path = dirname($directory);
+
+        $list = $this->ftp->nlist($path);
+        $ret = in_array($directory, $list) && !$this->fileExists($directory);
+
+        $this->restoreHandler();
+
+        return $ret;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function chdir($directory)
     {
         $this->setException('DirectoryException');
@@ -117,6 +133,29 @@ class FTP implements FTPInterface
     public function cdup()
     {
         return $this->ftp->cdup();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function mkdir($directory)
+    {
+        $this->setException('DirectoryException');
+        $this->handleErrors();
+
+        $directory = trim($directory, "/");
+        $directories = explode("/", $directory);
+        $path = "";
+        $ret = true;
+
+        foreach ($directories as $dir) {
+            $path = sprintf("%s/%s", $path, $dir);
+            $ret = $ret && !!$this->ftp->mkdir($path);
+        }
+
+        $this->restoreHandler();
+
+        return $ret;
     }
 
     /**
@@ -194,6 +233,8 @@ class FTP implements FTPInterface
     public function errorHandler($errno, $errstr, $errfile, $errline)
     {
         $exception = $this->getException();
+        $this->restoreHandler();
+
         throw new $exception($errstr);
 
         return false;
