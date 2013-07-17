@@ -2,7 +2,7 @@
 
 namespace Touki\FTP\Tests;
 
-use Touki\FTP\FileFactory;
+use Touki\FTP\FilesystemFactory;
 use Touki\FTP\PermissionsFactory;
 
 /**
@@ -14,7 +14,7 @@ class FileFactoryTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->factory = new FileFactory(new PermissionsFactory);
+        $this->factory = new FilesystemFactory(new PermissionsFactory);
     }
 
     public function testBuildDirectory()

@@ -2,20 +2,18 @@
 
 namespace Touki\FTP;
 
-use RuntimeException;
-use Touki\FTP\FTP\UploaderDecider;
-use Touki\FTP\FTP\UploaderDeciderInterface;
-use Touki\FTP\FTP\UploaderInterface;
-use Touki\FTP\FTP\DownloaderDecider;
-use Touki\FTP\FTP\DownloaderDeciderInterface;
-use Touki\FTP\FTP\DownloaderInterface;
+use Touki\FTP\Model\Filesystem;
+use Touki\FTP\Model\Directory;
+use Touki\FTP\Model\File;
+use Touki\FTP\Manager\FTPFilesystemManager;
+use Touki\FTP\Exception\DirectoryException;
 
 /**
  * FTP Class which implements standard behaviours of FTP
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FTP implements FTPInterface
+class FTP
 {
     const NON_BLOCKING          = 1;
     const NON_BLOCKING_CALLBACK = 2;
@@ -29,246 +27,97 @@ class FTP implements FTPInterface
     protected $ftp;
 
     /**
-     * Uploader factory
-     * @var UploaderDeciderInterface
+     * Directory Walker
+     * @var FTPFilesystemManager
      */
-    protected $uploaderDecider;
-
-    /**
-     * Previous Error handler
-     * @var mixed
-     */
-    protected $previousErrorHandler;
-
-    /**
-     * Exception class
-     * @var \Exception
-     */
-    protected $exception;
+    protected $walker;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper                 $ftp               The FTP Wrapper
-     * @param UploaderDeciderInterface   $uploaderDecider   An uploader decider. If none given, a new instance is created
-     * @param DownloaderDeciderInterface $downloaderDecider A downloader decider. If none given, a new instance is created
+     * @param FTPWrapper           $ftp    The FTP Wrapper
+     * @param FTPFilesystemManager $walker Directory Walker
      */
-    public function __construct(
-        FTPWrapper $ftp,
-        UploaderDeciderInterface $uploaderDecider = null,
-        DownloaderDeciderInterface $downloaderDecider = null
-    ) {
-        $this->ftp               = $ftp;
-        $this->uploaderDecider   = $uploaderDecider ?: new UploaderDecider($ftp);
-        $this->downloaderDecider = $downloaderDecider ?: new DownloaderDecider($ftp);
-        $this->exception         = 'RuntimeException';
+    public function __construct(FTPWrapper $ftp, FTPFilesystemManager $walker)
+    {
+        $this->ftp    = $ftp;
+        $this->walker = $walker;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function upload($remoteFile, $local, array $options = array())
+    public function findFilesystems(Directory $directory = null)
     {
-        $uploader = $this->uploaderDecider->decide($local, $options);
+        $directory = $directory ?: new Directory('/');
 
-        return $this->doUpload($uploader, $remoteFile, $local);
+        return $this->walker->findAll($directory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function download($local, $remoteFile, array $options = array())
+    public function findFiles(Directory $directory = null)
     {
-        $downloader = $this->downloaderDecider->decide($local, $options);
+        $directory = $directory ?: new Directory('/');
 
-        return $this->doDownload($downloader, $local, $remoteFile);
+        return $this->walker->findFiles($directory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function fileExists($remoteFile)
+    public function findDirectories(Directory $directory = null)
     {
-        return ($this->ftp->size($remoteFile) !== -1);
+        $directory = $directory ?: new Directory('/');
+
+        return $this->walker->findDirectories($directory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function directoryExists($directory)
+    public function fileExists(File $file)
     {
-        $this->setException('DirectoryException');
-        $this->handleErrors();
-
-        $path = dirname($directory);
-
-        $list = $this->ftp->nlist($path);
-        $ret = in_array($directory, $list) && !$this->fileExists($directory);
-
-        $this->restoreHandler();
-
-        return $ret;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function chdir($directory)
-    {
-        $this->setException('DirectoryException');
-        $this->handleErrors();
-
-        $ret = $this->ftp->chdir($directory);
-
-        $this->restoreHandler();
-
-        return $ret;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * No exception are thrown, couldn't find a way to generate one
-     */
-    public function cdup()
-    {
-        return $this->ftp->cdup();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function pwd()
-    {
-        return $this->ftp->pwd();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function mkdir($directory)
-    {
-        $this->setException('DirectoryException');
-        $this->handleErrors();
-
-        $directory = trim($directory, "/");
-        $directories = explode("/", $directory);
-        $path = "";
-        $ret = true;
-
-        foreach ($directories as $dir) {
-            $path = sprintf("%s/%s", $path, $dir);
-            $ret = $ret && !!$this->ftp->mkdir($path);
+        try {
+            return null !== $this->walker->findFileByFile($file);
+        } catch (DirectoryException $e) {
+            return false;
         }
-
-        $this->restoreHandler();
-
-        return $ret;
     }
 
     /**
-     * Processes the upload
-     *
-     * @param  UploaderInterface $uploader   An uploader
-     * @param  string            $remoteFile Remote file
-     * @param  mixed             $local      A local resource or file
-     * @return boolean           TRUE on success
+     * {@inheritDoc}
      */
-    public function doUpload(UploaderInterface $uploader, $remoteFile, $local)
+    public function directoryExists(Directory $directory)
     {
-        $this->setException('UploadException');
-        $this->handleErrors();
-
-        $result = $uploader->upload($remoteFile, $local);
-
-        $this->restoreHandler();
-
-        return $result;
-    }
-
-    /**
-     * Processes the download
-     *
-     * @param  DownloaderInterface $downloader A downloader
-     * @param  mixed               $local      A local resource or file
-     * @param  string              $remoteFile Remote file
-     * @return boolean             TRUE on success
-     */
-    public function doDownload(DownloaderInterface $downloader, $local, $remoteFile)
-    {
-        $this->setException('DownloadException');
-        $this->handleErrors();
-
-        $result = $downloader->download($local, $remoteFile);
-
-        $this->restoreHandler();
-
-        return $result;
-    }
-
-    /**
-     * Makes PHP know we want to handle errors
-     */
-    private function handleErrors()
-    {
-        $this->previousErrorHandler = set_error_handler(array($this, 'errorHandler'));
-    }
-
-    /**
-     * Restores the previous error handler if it had
-     */
-    private function restoreHandler()
-    {
-        if ($this->previousErrorHandler) {
-            set_error_handler($this->previousErrorHandler);
-        } else {
-            restore_error_handler();
+        try {
+            return null !== $this->walker->findDirectoryByDirectory($directory);
+        } catch (DirectoryException $e) {
+            return false;
         }
-
-        $this->setException('RuntimeException');
     }
 
     /**
-     * PHP Error handler
-     * It converts all warnings to RuntimeException
-     *
-     * @param  integer $errno   Niveau d'erreur
-     * @param  string  $errstr  Message d'erreur
-     * @param  string  $errfile Fichier d'erreur
-     * @param  integer $errline Ligne d'erreur
-     * @return boolean FALSE
+     * {@inheritDoc}
      */
-    public function errorHandler($errno, $errstr, $errfile, $errline)
+    public function findFileByName($filename)
     {
-        $exception = $this->getException();
-        $this->restoreHandler();
-
-        throw new $exception($errstr);
-
-        return false;
+        return $this->walker->findFileByName($filename);
     }
 
     /**
-     * Get Exception
-     *
-     * @return string Exception type to throw
+     * {@inheritDoc}
      */
-    public function getException()
+    public function findDirectoryByName($directory)
     {
-        return $this->exception;
+        return $this->walker->findDirectoryByName($directory);
     }
 
     /**
-     * Set Exception
-     *
-     * @param string $exception Exception type to throw
+     * {@inheritDoc}
      */
-    public function setException($exception)
+    public function download($local, Filesystem $remote, array $options = array())
     {
-        if (!class_exists($exception)) {
-            $exception = sprintf("Touki\FTP\Exception\%s", $exception);
-        }
-
-        $this->exception = $exception;
     }
 }

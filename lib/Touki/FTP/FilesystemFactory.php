@@ -12,7 +12,7 @@ use Touki\FTP\Model\Directory;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FileFactory
+class FilesystemFactory
 {
     /**
      * A Permissions Factory

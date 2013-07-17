@@ -1,29 +1,34 @@
 <?php
 
-namespace Touki\FTP\Tests\FTP;
+namespace Touki\FTP\Tests\Manager;
 
-use Touki\FTP\FTP\DirectoryWalker;
+use Touki\FTP\Manager\FTPFilesystemManager;
 use Touki\FTP\PermissionsFactory;
-use Touki\FTP\FileFactory;
+use Touki\FTP\FilesystemFactory;
 use Touki\FTP\FTPWrapper;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\Tests\ConnectionAwareTestCase;
 
-class DirectoryWalkerTest extends ConnectionAwareTestCase
+/**
+ * FTP Filesystem Manager Test Case
+ *
+ * @author Touki <g.vincendon@vithemis.com>
+ */
+class FTPFilesystemManagerTest extends ConnectionAwareTestCase
 {
     public function setUp()
     {
         parent::setUp();
 
         $wrapper = new FTPWrapper(self::$connection);
-        $factory = new FileFactory(new PermissionsFactory);
-        $this->walker = new DirectoryWalker($wrapper, $factory);
+        $factory = new FilesystemFactory(new PermissionsFactory);
+        $this->manager = new FTPFilesystemManager($wrapper, $factory);
     }
 
     public function testFindAll()
     {
-        $list = $this->walker->findAll("/");
+        $list = $this->manager->findAll("/");
         $this->assertCount(3, $list);
 
         foreach ($list as $item) {
@@ -33,7 +38,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindFiles()
     {
-        $list = $this->walker->findFiles("/");
+        $list = $this->manager->findFiles("/");
         $this->assertcount(2, $list);
 
         foreach ($list as $item) {
@@ -43,7 +48,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindDirectories()
     {
-        $list = $this->walker->findDirectories("/");
+        $list = $this->manager->findDirectories("/");
 
         $this->assertCount(1, $list);
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $list[0]);
@@ -52,7 +57,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindFileByName()
     {
-        $file = $this->walker->findFileByName("file1.txt");
+        $file = $this->manager->findFileByName("file1.txt");
 
         $this->assertInstanceOf('Touki\FTP\Model\File', $file);
         $this->assertEquals('/file1.txt', $file->getRealpath());
@@ -60,7 +65,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindFileByNameInFolder()
     {
-        $file = $this->walker->findFileByName("/folder/file3.txt");
+        $file = $this->manager->findFileByName("/folder/file3.txt");
 
         $this->assertInstanceOf('Touki\FTP\Model\File', $file);
         $this->assertEquals('/folder/file3.txt', $file->getRealpath());
@@ -68,7 +73,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindFileByNameNotDirectory()
     {
-        $file = $this->walker->findFileByName("/folder");
+        $file = $this->manager->findFileByName("/folder");
 
         $this->assertNull($file);
     }
@@ -76,7 +81,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
     public function testFindFileByFileFound()
     {
         $file    = new File("folder/file3.txt");
-        $fetched = $this->walker->findFileByFile($file);
+        $fetched = $this->manager->findFileByFile($file);
 
         $this->assertInstanceOf('Touki\FTP\Model\File', $fetched);
         $this->assertEquals('/folder/file3.txt', $fetched->getRealpath());
@@ -84,17 +89,17 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindFileByFileDirectory()
     {
-        $this->assertNull($this->walker->findFileByFile(new File('/folder')));
+        $this->assertNull($this->manager->findFileByFile(new File('/folder')));
     }
 
     public function testFindFileByFileNotFound()
     {
-        $this->assertNull($this->walker->findFileByFile(new File('/foo.txt')));
+        $this->assertNull($this->manager->findFileByFile(new File('/foo.txt')));
     }
 
     public function testFindDirectoryByName()
     {
-        $dir = $this->walker->findDirectoryByName("folder");
+        $dir = $this->manager->findDirectoryByName("folder");
 
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
         $this->assertEquals('/folder', $dir->getRealpath());
@@ -102,12 +107,12 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindDirectoryByNameFileGiven()
     {
-        $this->assertNull($this->walker->findDirectoryByName("file1.txt"));
+        $this->assertNull($this->manager->findDirectoryByName("file1.txt"));
     }
 
     public function testFindDirectoryByNameDeepFolder()
     {
-        $dir = $this->walker->findDirectoryByName('folder/subfolder');
+        $dir = $this->manager->findDirectoryByName('folder/subfolder');
 
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
         $this->assertEquals('/folder/subfolder', $dir->getRealpath());
@@ -115,7 +120,7 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindDirectoryByDirectory()
     {
-        $dir = $this->walker->findDirectoryByDirectory(new Directory("folder"));
+        $dir = $this->manager->findDirectoryByDirectory(new Directory("folder"));
 
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
         $this->assertEquals('/folder', $dir->getRealpath());
@@ -123,12 +128,12 @@ class DirectoryWalkerTest extends ConnectionAwareTestCase
 
     public function testFindDirectoryByDirectoryFileGiven()
     {
-        $this->assertNull($this->walker->findDirectoryByDirectory(new Directory("file1.txt")));
+        $this->assertNull($this->manager->findDirectoryByDirectory(new Directory("file1.txt")));
     }
 
     public function testFindDirectoryByDirectoryDeepFolder()
     {
-        $dir = $this->walker->findDirectoryByDirectory(new Directory('folder/subfolder'));
+        $dir = $this->manager->findDirectoryByDirectory(new Directory('folder/subfolder'));
 
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
         $this->assertEquals('/folder/subfolder', $dir->getRealpath());

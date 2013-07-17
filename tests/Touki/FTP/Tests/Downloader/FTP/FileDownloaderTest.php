@@ -1,0 +1,97 @@
+<?php
+
+namespace Touki\FTP\Tests\Downloader\FTP;
+
+use Touki\FTP\Tests\ConnectionAwareTestCase;
+use Touki\FTP\Downloader\FTP\FileDownloader;
+use Touki\FTP\Model\File;
+use Touki\FTP\Model\Directory;
+use Touki\FTP\FTP;
+use Touki\FTP\FTPWrapper;
+
+/**
+ * File downloader test
+ *
+ * @author Touki <g.vincendon@vithemis.com>
+ */
+class FileDownloaderTest extends ConnectionAwareTestCase
+{
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->downloader = new FileDownloader(new FTPWrapper(self::$connection));
+        $this->local      = tempnam(sys_get_temp_dir(), 'filedownloader');
+        $this->remote     = new File('file1.txt');
+        $this->options    = array(
+            FTP::NON_BLOCKING => false
+        );
+    }
+
+    public function testVote()
+    {
+        $this->assertTrue($this->downloader->vote($this->local, $this->remote, $this->options));
+    }
+
+    public function testDownload()
+    {
+        $this->assertTrue($this->downloader->download($this->local, $this->remote, $this->options));
+        $this->assertFileExists($this->local);
+        $this->assertEquals(file_get_contents($this->local), 'file1');
+
+        unlink($this->local);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     */
+    public function testDownloadWrongFilesystemInstance()
+    {
+        $remote = new Directory('/');
+
+        $this->downloader->download($this->local, $remote, $this->options);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     */
+    public function testDownloadResourceGiven()
+    {
+        $local = fopen($this->local, 'w+');
+        
+        $this->downloader->download($local, $this->remote, $this->options);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     */
+    public function testDownloadDirectoryGiven()
+    {
+        $local = __DIR__;
+
+        $this->downloader->download($local, $this->remote, $this->options);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     */
+    public function testDownloadNoOptionNonBlocking()
+    {
+        $this->downloader->download($this->local, $this->remote);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     */
+    public function testDownloadWrongOptionNonBlocking()
+    {
+        $this->downloader->download($this->local, $this->remote, array(
+            FTP::NON_BLOCKING => true
+        ));
+    }
+}

@@ -2,9 +2,19 @@
 
 namespace Touki\FTP\Tests;
 
+use Touki\FTP\FilesystemFactory;
+use Touki\FTP\PermissionsFactory;
 use Touki\FTP\FTPWrapper;
 use Touki\FTP\FTP;
+use Touki\FTP\Manager\FTPFilesystemManager;
+use Touki\FTP\Model\Directory;
+use Touki\FTP\Model\File;
 
+/**
+ * FTP API Test case
+ *
+ * @author Touki <g.vincendon@vithemis.com>
+ */
 class FTPTest extends ConnectionAwareTestCase
 {
     public function setUp()
@@ -12,156 +22,184 @@ class FTPTest extends ConnectionAwareTestCase
         parent::setUp();
 
         $connection    = self::$connection;
+        $this->factory = new FilesystemFactory(new PermissionsFactory);
         $this->wrapper = new FTPWrapper($connection);
-        $this->ftp     = new FTP($this->wrapper);
+        $this->walker  = new FTPFilesystemManager($this->wrapper, $this->factory);
+        $this->ftp     = new FTP($this->wrapper, $this->walker);
     }
 
-    public function testExistsNonExistingFile()
+    public function testFindFilesystems()
     {
-        $this->assertFalse($this->ftp->fileExists('bar.txt'));
-        $this->assertFalse($this->ftp->fileExists('folder'));
+        $list = $this->ftp->findFilesystems(new Directory('/'));
+        $this->assertCount(3, $list);
+
+        foreach ($list as $item) {
+            $this->assertInstanceOf('Touki\FTP\Model\Filesystem', $item);
+        }
     }
 
-    public function testExistsExistingFile()
+    public function testFindFilesystemsDeep()
     {
-        $this->assertTrue($this->ftp->fileExists('file1.txt'));
-    }
+        $list = $this->ftp->findFilesystems(new Directory('folder'));
+        $this->assertCount(2, $list);
 
-    public function testDirectoryExistsFilesGiven()
-    {
-        $this->assertFalse($this->ftp->directoryExists('file1.txt'));
-        $this->assertFalse($this->ftp->directoryExists('folder/file2.txt'));
-    }
-
-    public function testDirectoryExistsSuccessful()
-    {
-        $this->assertTrue($this->ftp->directoryExists('folder'));
-    }
-
-    public function testDirectoryExistsOnDeepDirectory()
-    {
-        $this->assertTrue($this->ftp->directoryExists('folder/subfolder'));
+        foreach ($list as $item) {
+            $this->assertInstanceOf('Touki\FTP\Model\Filesystem', $item);
+        }
     }
 
     /**
-     * @expectedException Touki\FTP\Exception\UploadException
-     * Unknown remote file with a given START_POS leads to a ftp_put error
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
      */
-    public function testUploadErrorsConvertsToException()
+    public function testFindFilesystemsUnknownFolder()
     {
-        $options = array(
-            FTP::START_POS => 20
-        );
-
-        $this->ftp->upload('/unknown/remote/file/', __FILE__, $options);
+        $this->ftp->findFilesystems(new Directory('foo'));
     }
 
-    public function testUploadFileSuccessful()
+    public function testFindFiles()
     {
-        $remoteFile = basename(__FILE__);
-        $localFile  = __FILE__;
+        $list = $this->ftp->findFiles(new Directory('/'));
+        $this->assertCount(2, $list);
 
-        $this->assertTrue($this->ftp->upload($remoteFile, $localFile));
-        $this->assertGreaterThan(-1, $this->wrapper->size($remoteFile));
-
-        $this->wrapper->delete($remoteFile);
+        foreach ($list as $item) {
+            $this->assertInstanceOf('Touki\FTP\Model\File', $item);
+        }
     }
 
-    public function testUploadFileResourceSuccessful()
+    public function testFindFilesDeep()
     {
-        $remoteFile = basename(__FILE__);
-        $filename   = __FILE__;
-        $localFile  = fopen($filename, 'r');
+        $list = $this->ftp->findFiles(new Directory('folder'));
 
-        $this->assertTrue($this->ftp->upload($remoteFile, $localFile));
-        $this->assertGreaterThan(-1, $this->wrapper->size($remoteFile));
-
-        $this->wrapper->delete($remoteFile);
-        fclose($localFile);
+        $this->assertCount(1, $list);
+        $this->assertInstanceOf('Touki\FTP\Model\File', $list[0]);
+        $this->assertEquals('/folder/file3.txt', $list[0]->getRealpath());
     }
 
     /**
-     * @expectedException Touki\FTP\Exception\DownloadException
-     * Unknown remote file will generate an error
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
      */
-    public function testDownloadErrorsConvertsToException()
+    public function testFindFilesUnknownFolder()
     {
-        $localFile = tempnam(sys_get_temp_dir(), 'ftp-test');
-
-        $this->ftp->download($localFile, '/unknown/remote/file/');
+        $this->ftp->findFiles(new Directory('/foo'));
     }
 
-    public function testDownloadFileSuccessful()
+    public function testFindDirectories()
     {
-        $filename   = tempnam(sys_get_temp_dir(), 'ftp-test');
-        $localFile  = $filename;
-        $remoteFile = 'file1.txt';
+        $list = $this->ftp->findDirectories(new Directory('/'));
 
-        $this->assertTrue($this->ftp->download($localFile, $remoteFile));
-        $this->assertFileExists($filename);
-
-        unlink($filename);
+        $this->assertCount(1, $list);
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $list[0]);
+        $this->assertEquals('/folder', $list[0]->getRealpath());
     }
 
-    public function testDownloadFileResourceSuccessful()
+    public function testFindDirectoriesDeep()
     {
-        $filename   = tempnam(sys_get_temp_dir(), 'ftp-test');
-        $localFile  = fopen($filename, 'w+');
-        $remoteFile = 'file1.txt';
+        $list = $this->ftp->findDirectories(new Directory('/folder'));
 
-        $this->assertTrue($this->ftp->download($localFile, $remoteFile));
-        $this->assertFileExists($filename);
-
-        unlink($filename);
-        fclose($localFile);
+        $this->assertCount(1, $list);
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $list[0]);
+        $this->assertEquals('/folder/subfolder', $list[0]->getRealpath());
     }
 
     /**
-     * @expectedException Touki\FTP\Exception\DirectoryException
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
      */
-    public function testChdirErrorsConvertsToException()
+    public function testFindDirectoriesUnknownFolder()
     {
-        $this->ftp->chdir("/unknown/remote/dir/");
+        $this->ftp->findDirectories(new Directory('foo'));
     }
 
-    public function testChdirSuccessful()
+    public function testFileExists()
     {
-        $this->assertEquals('/', $this->wrapper->pwd());
-        $this->ftp->chdir("folder");
-        $this->assertEquals("/folder", $this->wrapper->pwd());
-        $this->ftp->chdir("/");
+        $this->assertTrue($this->ftp->fileExists(new File('file1.txt')));
+        $this->assertTrue($this->ftp->fileExists(new File('/file2.txt')));
+        $this->assertTrue($this->ftp->fileExists(new File('folder/file3.txt')));
+        $this->assertTrue($this->ftp->fileExists(new File('/folder/file3.txt')));
     }
 
-    public function testCdupSuccessful()
+    public function testFileExistsNonExistant()
     {
-        $this->wrapper->chdir("/folder");
-        $this->assertEquals("/folder", $this->wrapper->pwd());
-        $this->ftp->cdup();
-        $this->assertEquals("/", $this->wrapper->pwd());
+        $this->assertFalse($this->ftp->fileExists(new File('/foo.txt')));
+        $this->assertFalse($this->ftp->fileExists(new File('foo.txt')));
+        $this->assertFalse($this->ftp->fileExists(new File('folder/foo.txt')));
+        $this->assertFalse($this->ftp->fileExists(new File('/unknown/folder/foo.txt')));
+    }
+
+    public function testDirectoryExists()
+    {
+        $this->assertTrue($this->ftp->directoryExists(new Directory('folder')));
+        $this->assertTrue($this->ftp->directoryExists(new Directory('/folder')));
+        $this->assertTrue($this->ftp->directoryExists(new Directory('/folder/subfolder')));
+    }
+
+    public function testDirectoryExistsNonExistant()
+    {
+        $this->assertFalse($this->ftp->directoryExists(new Directory('foo')));
+        $this->assertFalse($this->ftp->directoryExists(new Directory('/unknown/folder')));
+    }
+
+    public function testFindFileByName()
+    {
+        $file = $this->ftp->findFileByName('file1.txt');
+
+        $this->assertInstanceOf('Touki\FTP\Model\File', $file);
+        $this->assertEquals('/file1.txt', $file->getRealpath());
+    }
+
+    public function testFindFileByNameDeep()
+    {
+        $file = $this->ftp->findFileByName('folder/file3.txt');
+
+        $this->assertInstanceOf('Touki\FTP\Model\File', $file);
+        $this->assertEquals('/folder/file3.txt', $file->getRealpath());
     }
 
     /**
-     * @expectedException Touki\FTP\Exception\DirectoryException
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
      */
-    public function testMkdirErrorsConvertsToException()
+    public function testFindFileByNameUnknownFolder()
     {
-        $this->ftp->mkdir("/folder");
+        $this->ftp->findFileByName('foo/bar');
     }
 
-    public function testMkdirSuccessful()
+    public function testFindFileByNameNotFound()
     {
-        $this->assertTrue($this->ftp->mkdir("/folder2"));
-
-        $this->wrapper->rmdir("/folder2");
+        $this->assertNull($this->ftp->findFileByName('bar'));
+        $this->assertNull($this->ftp->findFileByName('folder/baz'));
     }
 
-    public function testMkdirDeepSuccessful()
+    public function testFindDirectoryByName()
     {
-        $this->assertTrue($this->ftp->mkdir("/deep/nested/folder"));
+        $dir = $this->ftp->findDirectoryByName('folder');
 
-        $this->wrapper->rmdir("/deep/nested/folder");
-        $this->wrapper->rmdir("/deep/nested");
-        $this->wrapper->rmdir("/deep");
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/folder', $dir->getRealpath());
     }
 
+    public function testFindDirectoryByNameDeep()
+    {
+        $dir = $this->ftp->findDirectoryByName('folder/subfolder');
+
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/folder/subfolder', $dir->getRealpath());
+    }
+
+    /**
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
+     */
+    public function testFindDirectoryByNameUnknownFolder()
+    {
+        $this->ftp->findDirectoryByName('foo/bar');
+    }
+
+    public function testFindDirectoryByNameNotFound()
+    {
+        $this->assertNull($this->ftp->findDirectoryByName('bar'));
+        $this->assertNull($this->ftp->findDirectoryByName('folder/baz'));
+    }
 }

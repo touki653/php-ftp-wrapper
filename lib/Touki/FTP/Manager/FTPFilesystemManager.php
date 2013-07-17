@@ -1,19 +1,20 @@
 <?php
 
-namespace Touki\FTP\FTP;
+namespace Touki\FTP\Manager;
 
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\FileFactory;
+use Touki\FTP\FilesystemFactory;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
+use Touki\FTP\Exception\DirectoryException;
 
 /**
- * Directory Manager to fetch various informations on the distant FTP
+ * FTP Filesystem Manager to fetch various informations on the distant FTP
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class DirectoryWalker
+class FTPFilesystemManager
 {
     /**
      * FTP Wrapper
@@ -23,39 +24,20 @@ class DirectoryWalker
 
     /**
      * File factory
-     * @var FileFactory
+     * @var FilesystemFactory
      */
     protected $factory;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper  $wrapper A FTPWrapper instance
-     * @param FileFactory $wrapper A FileFactory instance
+     * @param FTPWrapper        $wrapper A FTPWrapper instance
+     * @param FilesystemFactory $factory A FilesystemFactory instance
      */
-    public function __construct(FTPWrapper $wrapper, FileFactory $factory)
+    public function __construct(FTPWrapper $wrapper, FilesystemFactory $factory)
     {
         $this->wrapper = $wrapper;
         $this->factory = $factory;
-    }
-
-    /**
-     * Finds all files and directories in the given directory
-     *
-     * @param  string $directory Directory to traverse
-     * @return array
-     */
-    public function findAll($directory)
-    {
-        $directory = '/'.ltrim($directory, "/");
-        $raw  = $this->wrapper->rawlist($directory);
-        $list = array();
-
-        foreach ($raw as $item) {
-            $list[] = $this->factory->build($item, $directory);
-        }
-
-        return $list;
     }
 
     /**
@@ -64,6 +46,8 @@ class DirectoryWalker
      * @param  string   $directory Directory to traverse
      * @param  callable $callable  A Callable filter
      * @return array    Fetched filesystems
+     *
+     * @throws DirectoryException When supplied directory does not exist
      */
     public function findBy($directory, $callable)
     {
@@ -71,16 +55,47 @@ class DirectoryWalker
             throw new \InvalidArgumentException(sprintf("Cannot filter results. Expected callable, got %s", gettype($callable)));
         }
 
-        $list = $this->findAll($directory);
+        if ($directory instanceof Directory) {
+            $directory = $directory->getRealpath();
+        }
 
-        return array_values(array_filter($list, $callable));
+        $directory = '/'.ltrim($directory, '/');
+        $raw       = $this->wrapper->rawlist($directory);
+        $list      = array();
+
+        if (false === $raw) {
+            throw new DirectoryException(sprintf("Directory %s not found", $directory));
+        }
+
+        foreach ($raw as $item) {
+            $fs = $this->factory->build($item, $directory);
+
+            if (true === call_user_func_array($callable, array($fs))) {
+                $list[] = $fs;
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * Finds all files and directories in the given directory
+     *
+     * @param  mixed $directory Directory name or a Directory instance
+     * @return array
+     */
+    public function findAll($directory)
+    {
+        return $this->findBy($directory, function($item) {
+            return true;
+        });
     }
 
     /**
      * Finds all files in the given directory
      *
-     * @param  string $directory Directory to traverse
-     * @return array  An array of File
+     * @param  mixed $directory Directory name or Directory instance
+     * @return array An array of File
      */
     public function findFiles($directory)
     {
@@ -92,8 +107,8 @@ class DirectoryWalker
     /**
      * Finds all directories in the given directory
      *
-     * @param  string $directory Directory to traverse
-     * @return array  An array of Directories
+     * @param  mixed $directory Directory name or Directory instance
+     * @return array An array of Directories
      */
     public function findDirectories($directory)
     {
@@ -105,9 +120,11 @@ class DirectoryWalker
     /**
      * Finds a single Directory / file
      *
-     * @param  string     $directory Directory to traverse
+     * @param  mixed      $directory Directory name or Directory instance
      * @param  callable   $callable  A fitler callback
      * @return Filesystem Fetched Filesystem
+     *
+     * @throws DirectoryException When supplied directory does not exist
      */
     public function findOneBy($directory, $callable)
     {
@@ -115,14 +132,27 @@ class DirectoryWalker
             throw new \InvalidArgumentException(sprintf("Cannot filter results. Expected callable, got %s", gettype($callable)));
         }
 
-        $list = $this->findAll($directory);
-        $ret  = array_values(array_filter($list, $callable));
-
-        if (count($ret) != 1) {
-            return null;
+        if ($directory instanceof Directory) {
+            $directory = $directory->getRealpath();
         }
 
-        return $ret[0];
+        $directory = '/'.ltrim($directory, "/");
+        $raw       = $this->wrapper->rawlist($directory);
+        $list      = array();
+
+        if (false === $raw) {
+            throw new DirectoryException(sprintf("Directory %s not found", $directory));
+        }
+
+        foreach ($raw as $item) {
+            $fs = $this->factory->build($item, $directory);
+
+            if (true === call_user_func_array($callable, array($fs))) {
+                return $fs;
+            }
+        }
+
+        return null;
     }
 
     /**
