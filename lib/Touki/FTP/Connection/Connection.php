@@ -65,7 +65,7 @@ class Connection implements ConnectionInterface
      * @param integer $port     Specify the port to connect to
      * @param integer $timeout  Specify the default timeout
      */
-    public function __construct($host, $username = 'anonymous', $password = '', $port = 21, $timeout = 90)
+    public function __construct($host, $username = 'anonymous', $password = 'guest', $port = 21, $timeout = 90)
     {
         $this->host     = $host;
         $this->username = $username;
@@ -89,22 +89,34 @@ class Connection implements ConnectionInterface
             throw new ConnectionEstablishedException;
         }
 
-        $stream = @ftp_connect($this->getHost(), $this->getPort(), $this->getTimeout());
+        $stream = $this->doConnect();
 
         if (false === $stream) {
             throw new ConnectionException(sprintf("Could not connect to server %s:%s", $this->getHost(), $this->getPort()));
         }
 
         if (!@ftp_login($stream, $this->getUsername(), $this->getPassword())) {
-            throw new ConnectionException(
-                sprintf("Invalid combination of username (%s) and password (%s)", $this->getUsername(), $this->getPassword())
-            );
+            throw new ConnectionException(sprintf(
+                "Could not login using combination of username (%s) and password (%s)",
+                $this->getUsername(),
+                preg_replace("/./", "*", $this->getPassword())
+            ));
         }
 
         $this->connected = true;
         $this->stream    = $stream;
 
         return true;
+    }
+
+    /**
+     * Calls the connector
+     *
+     * @return boolean TRUE on success, FALSE on failure
+     */
+    protected function doConnect()
+    {
+        return @ftp_connect($this->getHost(), $this->getPort(), $this->getTimeout());
     }
 
     /**

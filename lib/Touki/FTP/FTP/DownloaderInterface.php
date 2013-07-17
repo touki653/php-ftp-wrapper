@@ -12,9 +12,9 @@ interface DownloaderInterface
     /**
      * Processes the download
      *
-     * @param  string  $remoteFile Remote File
      * @param  mixed   $local      Local file or resource
+     * @param  string  $remoteFile Remote File
      * @return boolean TRUE on success
      */
-    public function download($remoteFile, $local);
+    public function download($local, $remoteFile);
 }

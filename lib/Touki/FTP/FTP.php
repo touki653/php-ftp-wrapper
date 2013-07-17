@@ -138,6 +138,14 @@ class FTP implements FTPInterface
     /**
      * {@inheritDoc}
      */
+    public function pwd()
+    {
+        return $this->ftp->pwd();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function mkdir($directory)
     {
         $this->setException('DirectoryException');
@@ -249,7 +257,7 @@ class FTP implements FTPInterface
     {
         return $this->exception;
     }
-    
+
     /**
      * Set Exception
      *

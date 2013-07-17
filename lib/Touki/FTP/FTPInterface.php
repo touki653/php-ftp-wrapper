@@ -77,4 +77,11 @@ interface FTPInterface
      * @return boolean TRUE on success
      */
     public function mkdir($directory);
+
+    /**
+     * Returns the current directory
+     *
+     * @return string The current directory
+     */
+    public function pwd();
 }

@@ -53,7 +53,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException        Touki\FTP\Exception\ConnectionException
-     * @expectedExceptionMessage Invalid combination of username (foo) and password (baz)
+     * @expectedExceptionMessage Could not login using combination of username (foo) and password (***)
      * @depends                  testOpenSuccessful
      */
     public function testOpenOnInvalidCredentialsGiven()
