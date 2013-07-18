@@ -1,20 +1,20 @@
 <?php
 
-namespace Touki\FTP\Downloader\FTP;
+namespace Touki\FTP\Uploader\FTP;
 
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\DownloaderInterface;
-use Touki\FTP\DownloaderVotableInterface;
+use Touki\FTP\UploaderInterface;
+use Touki\FTP\UploaderVotableInterface;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 
 /**
- * FTP Resource downloader
+ * FTP Resource uploader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterface
+class ResourceUploader implements UploaderInterface, UploaderVotableInterface
 {
     /**
      * FTP Wrapper
@@ -35,12 +35,11 @@ class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterf
     /**
      * {@inheritDoc}
      */
-    public function vote($local, Filesystem $remote, array $options = array())
+    public function vote(Filesystem $remote, $local, array $options = array())
     {
         return
             ($remote instanceof File)
             && true === is_resource($local)
-            // && false === is_dir($local) If it's a resource, it cannot be a directory, duh.
             && isset($options[ FTP::NON_BLOCKING ])
             && false === $options[ FTP::NON_BLOCKING ]
         ;
@@ -51,7 +50,7 @@ class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterf
      *
      * @throws InvalidArgumentException When argument(s) is(are) incorrect
      */
-    public function download($local, Filesystem $remote, array $options = array())
+    public function upload(Filesystem $remote, $local, array $options = array())
     {
         if (!($remote instanceof File)) {
             throw new \InvalidArgumentException(sprintf(
@@ -79,6 +78,6 @@ class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterf
 
         $this->wrapper->pasv(true);
 
-        return $this->wrapper->fget($local, $remote->getRealPath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
+        return $this->wrapper->fput($remote->getRealPath(), $local, $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
     }
 }

@@ -53,9 +53,23 @@ class NbFileDownloader implements DownloaderInterface, DownloaderVotableInterfac
      */
     public function download($local, Filesystem $remote, array $options = array())
     {
-        // Double check
-        if (!$this->vote($local, $remote, $options)) {
-            throw new \InvalidArgumentException("Download arguments given do not match with the downloader");
+        if (!($remote instanceof File)) {
+            throw new \InvalidArgumentException(sprintf(
+                "Invalid remote file given, expected instance of File, got %s",
+                get_class($remote)
+            ));
+        }
+
+        if (false !== is_resource($local)) {
+            throw new \InvalidArgumentException("Invalid local file given. Expected filename, got resource");
+        }
+
+        if (false !== is_dir($local)) {
+            throw new \InvalidArgumentException("Invalid local file given. Expected filename, got directory");
+        }
+
+        if (!isset($options[ FTP::NON_BLOCKING ]) || true !== $options[ FTP::NON_BLOCKING ]) {
+            throw new \InvalidArgumentException("Invalid option given. Expected true as FTP::NON_BLOCKING parameter");
         }
 
         $defaults = array(

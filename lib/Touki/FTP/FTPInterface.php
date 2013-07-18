@@ -2,9 +2,9 @@
 
 namespace Touki\FTP;
 
-use Touki\FTP\Exception\UploadException;
-use Touki\FTP\Exception\DownloadException;
-use Touki\FTP\Exception\DirectoryException;
+use Touki\FTP\Model\Filesystem;
+use Touki\FTP\Model\File;
+use Touki\FTP\Model\Directory;
 
 /**
  * Base FTP Interface
@@ -14,74 +14,94 @@ use Touki\FTP\Exception\DirectoryException;
 interface FTPInterface
 {
     /**
-     * Uploads a local resource or file
+     * Finds remote filesystems in the given remote directory
      *
-     * @param  string  $remoteFile Remote file path
-     * @param  mixed   $local      Local resource or file
-     * @param  array   $options    Options
-     * @return boolean TRUE when upload succeeded
-     *
-     * @throws UploadException When an error occured
+     * @param  Directory $directory A Directory instance
+     * @return array     An array of Filesystem
      */
-    public function upload($remoteFile, $local, array $options = array());
+    public function findFilesystems(Directory $directory);
 
     /**
-     * Downloads a remote file into a resource or file
+     * Finds files in the given remote directory
      *
-     * @param  mixed   $local      Local Resource or file
-     * @param  string  $remoteFile Remote file path
-     * @param  array   $options    Options
-     * @return boolean TRUE when download succeeded
-     *
-     * @throws DownloadException When an error occured
+     * @param  Directory $directory A Directory instance
+     * @return array     An array of File
      */
-    public function download($local, $remoteFile, array $options = array());
+    public function findFiles(Directory $directory);
 
     /**
-     * Checks if a remote file exists
+     * Finds directories in the given remote directory
      *
-     * @param  string  $remoteFile Remote file path
-     * @return boolean TRUE when it exists, FALSE when it doesn't
+     * @param  Directory $directory A Directory instance
+     * @return array     An array of Directory
      */
-    public function fileExists($remoteFile);
+    public function findDirectories(Directory $directory);
 
     /**
-     * Checks if a directory exists
+     * Checks whether a remote filesystem exists
      *
-     * @param  string  $directory Directory name
-     * @return boolean TRUE if it exists, FALSE when it doesn't
+     * @param  Filesystem $fs A Filesystem instance
+     * @return boolean    TRUE if it exists, FALSE if not
      */
-    public function directoryExists($directory);
+    public function filesystemExists(Filesystem $fs);
 
     /**
-     * Changes the current working directory
+     * Checks whether a remote file exists
      *
-     * @param  string  $directory Target directory
-     * @return boolean TRUE on success
-     *
-     * @throws DirectoryException When an error occured
+     * @param  File    $file A File instance
+     * @return boolean TRUE if it exists, FALSE if not
      */
-    public function chdir($directory);
+    public function fileExists(File $file);
 
     /**
-     * Changes to the parent directory
+     * Checks whether a remote directory exists
      *
-     * @return boolean TRUE on success
+     * @param  Directory $directory A Directory instance
+     * @return boolean   TRUE if it exists, FALSE if not
      */
-    public function cdup();
+    public function directoryExists(Directory $directory);
 
     /**
-     * Creates a new directory
+     * Finds a remote Filesystem by its name
      *
-     * @param  string  $directory The name of the directory to create
-     * @return boolean TRUE on success
+     * @param  string     $filename Filesystem name
+     * @return Filesystem A Filesystem instance, NULL if it doesn't exists
      */
-    public function mkdir($directory);
+    public function findFilesystemByName($filename);
 
     /**
-     * Returns the current directory
+     * Finds a remote File by its name
      *
-     * @return string The current directory
+     * @param  string $filename File name
+     * @return File   A File instance, NULL if it doesn't exists
      */
-    public function pwd();
+    public function findFileByName($filename);
+
+    /**
+     * Finds a directory by its name
+     *
+     * @param  string    $directory Directory name
+     * @return Directory A Directory instance, NULL if it doesn't exists
+     */
+    public function findDirectoryByName($directory);
+
+    /**
+     * Downloads a remote Filesystem into the given local
+     *
+     * @param  mixed      $local   Local file, resource
+     * @param  Filesystem $remote  The remote Filesystem
+     * @param  array      $options Downloader's options
+     * @return boolean    TRUE on success, FALSE on failure
+     */
+    public function download($local, Filesystem $remote, array $options = array());
+
+    /**
+     * Uploads to a remote Filesystem from a given local
+     *
+     * @param  Filesystem $remote  The remote Filesystem
+     * @param  mixed      $local   Local file, resource
+     * @param  array      $options Uploader's options
+     * @return boolean    TRUE on success, FALSE on failure
+     */
+    public function upload(Filesystem $remote, $local, array $options = array());
 }

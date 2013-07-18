@@ -10,11 +10,11 @@ use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 
 /**
- * FTP Resource downloader
+ * Non Blocking FTP Resource downloader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterface
+class NbResourceDownloader implements DownloaderInterface, DownloaderVotableInterface
 {
     /**
      * FTP Wrapper
@@ -40,9 +40,8 @@ class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterf
         return
             ($remote instanceof File)
             && true === is_resource($local)
-            // && false === is_dir($local) If it's a resource, it cannot be a directory, duh.
             && isset($options[ FTP::NON_BLOCKING ])
-            && false === $options[ FTP::NON_BLOCKING ]
+            && true === $options[ FTP::NON_BLOCKING ]
         ;
     }
 
@@ -67,18 +66,29 @@ class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterf
             ));
         }
 
-        if (!isset($options[ FTP::NON_BLOCKING ]) || false !== $options[ FTP::NON_BLOCKING ]) {
-            throw new \InvalidArgumentException("Invalid option given. Expected false as FTP::NON_BLOCKING parameter");
+        if (!isset($options[ FTP::NON_BLOCKING ]) || true !== $options[ FTP::NON_BLOCKING ]) {
+            throw new \InvalidArgumentException("Invalid option given. Expected true as FTP::NON_BLOCKING parameter");
         }
 
         $defaults = array(
+            FTP::NON_BLOCKING_CALLBACK => function() { },
             FTP::TRANSFER_MODE => FTPWrapper::BINARY,
             FTP::START_POS     => 0
         );
-        $options = $options + $defaults;
+        $options  = $options + $defaults;
+        $callback = $options[ FTP::NON_BLOCKING_CALLBACK ];
 
         $this->wrapper->pasv(true);
 
-        return $this->wrapper->fget($local, $remote->getRealPath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
+        $state = $this->wrapper->fgetNb($local, $remote->getRealpath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
+        call_user_func_array($callback, array());
+
+        while ($state == FTPWrapper::MOREDATA) {
+            $state = $this->wrapper->nbContinue();
+
+            call_user_func_array($callback, array());
+        }
+
+        return $state === FTPWrapper::FINISHED;
     }
 }

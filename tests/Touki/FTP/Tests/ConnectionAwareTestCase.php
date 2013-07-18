@@ -3,6 +3,7 @@
 namespace Touki\FTP\Tests;
 
 use Touki\FTP\Connection\Connection;
+use Touki\FTP\FTPWrapper;
 
 /**
  * Base class for connection test case.
@@ -13,6 +14,7 @@ use Touki\FTP\Connection\Connection;
 abstract class ConnectionAwareTestCase extends \PHPUnit_Framework_TestCase
 {
     protected static $connection;
+    protected static $wrapper;
     protected static $worked;
 
     /**
@@ -31,7 +33,8 @@ abstract class ConnectionAwareTestCase extends \PHPUnit_Framework_TestCase
         try {
             $connection->open();
             self::$connection = $connection;
-            self::$worked = true;
+            self::$wrapper    = new FTPWrapper($connection);
+            self::$worked     = true;
         } catch (\Exception $e) {
             self::$worked = false;
         }

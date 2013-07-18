@@ -3,40 +3,40 @@
 namespace Touki\FTP\Tests;
 
 use Touki\FTP\FTP;
-use Touki\FTP\DownloaderVoter;
+use Touki\FTP\UploaderVoter;
 use Touki\FTP\Model\File;
 
 /**
- * Downloader voter test case
+ * Uploader voter test case
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class DownloaderVoterTest extends \PHPUnit_Framework_TestCase
+class UploaderVoterTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $mock = $this->getMock('Touki\FTP\DownloaderVotableInterface');
+        $mock = $this->getMock('Touki\FTP\UploaderVotableInterface');
         $mock
             ->expects($this->once())
             ->method('vote')
             ->will($this->returnValue(false))
         ;
-        $this->voter = new DownloaderVoter;
+        $this->voter = new UploaderVoter;
         $this->voter->addVotable($mock);
     }
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Could not resolve a downloader with the given options
+     * @expectedExceptionMessage Could not resolve an uploader with the given options
      */
     public function testVoteNoEligibleVoters()
     {
-        $this->voter->vote('foo', new File('bar'), array('baz'));
+        $this->voter->vote(new File('bar'), 'foo', array('baz'));
     }
 
     public function testVoteEligibleVoter()
     {
-        $mock = $this->getMock('Touki\FTP\DownloaderVotableInterface');
+        $mock = $this->getMock('Touki\FTP\UploaderVotableInterface');
         $mock
             ->expects($this->once())
             ->method('vote')
@@ -44,7 +44,7 @@ class DownloaderVoterTest extends \PHPUnit_Framework_TestCase
         ;
 
         $this->voter->addVotable($mock);
-        $votable = $this->voter->vote('foo', new File('bar'), array('baz'));
+        $votable = $this->voter->vote(new File('bar'), 'foo', array('baz'));
 
         $this->assertSame($mock, $votable);
     }

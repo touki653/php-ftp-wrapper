@@ -10,7 +10,7 @@ use Touki\FTP\Model\Filesystem;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class DownloaderVoter
+class DownloaderVoter implements DownloaderVoterInterface
 {
     /**
      * An array of votable downloader
@@ -41,15 +41,13 @@ class DownloaderVoter
     public function addDefaultFTPDownloaders(FTPWrapper $wrapper)
     {
         $this->addVotable(new FTPDownloader\FileDownloader($wrapper));
+        $this->addVotable(new FTPDownloader\ResourceDownloader($wrapper));
+        $this->addVotable(new FTPDownloader\NbFileDownloader($wrapper));
+        $this->addVotable(new FTPDownloader\NbResourceDownloader($wrapper));
     }
 
     /**
-     * Processes the vote
-     *
-     * @param  mixed               $local   Local component
-     * @param  Filesystem          $remote  Remote component
-     * @param  array               $options Voter's options
-     * @return DownloaderInterface Chosen Downloader
+     * {@inheritDoc}
      */
     public function vote($local, Filesystem $remote, array $options = array())
     {

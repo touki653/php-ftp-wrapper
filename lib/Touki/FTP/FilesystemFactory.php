@@ -33,8 +33,8 @@ class FilesystemFactory
     /**
      * Builds a file from a given input line
      *
-     * @param  string  $input Input string
-     * @return FTPFile Newly created File object
+     * @param  string     $input Input string
+     * @return Filesystem Newly created File object
      */
     public function build($input, $prefix = '')
     {
@@ -71,8 +71,8 @@ class FilesystemFactory
     /**
      * Resolves the file type
      *
-     * @param  string                      $type File letter
-     * @return \Touki\FTP\Model\Filesystem
+     * @param  string     $type File letter
+     * @return Filesystem
      */
     private function resolveFile($type)
     {

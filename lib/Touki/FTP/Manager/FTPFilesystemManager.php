@@ -86,7 +86,7 @@ class FTPFilesystemManager
      */
     public function findAll($directory)
     {
-        return $this->findBy($directory, function($item) {
+        return $this->findBy($directory, function() {
             return true;
         });
     }
@@ -138,7 +138,6 @@ class FTPFilesystemManager
 
         $directory = '/'.ltrim($directory, "/");
         $raw       = $this->wrapper->rawlist($directory);
-        $list      = array();
 
         if (false === $raw) {
             throw new DirectoryException(sprintf("Directory %s not found", $directory));
@@ -153,6 +152,33 @@ class FTPFilesystemManager
         }
 
         return null;
+    }
+
+    /**
+     * Finds a filesystem by its name
+     *
+     * @param  string     $name Filesystem name
+     * @return Filesystem
+     */
+    public function findFilesystemByName($name)
+    {
+        $name      = '/'.ltrim($name, '/');
+        $directory = dirname($name);
+
+        return $this->findOneBy($directory, function ($item) use ($name) {
+            return $name == $item->getRealpath();
+        });
+    }
+
+    /**
+     * Finds a filesystem by a filesystem
+     *
+     * @param  Filesystem $name Filesystem instance
+     * @return Filesystem
+     */
+    public function findFilesystemByFilesystem(Filesystem $fs)
+    {
+        return $this->findFilesystemByName($fs->getRealpath());
     }
 
     /**

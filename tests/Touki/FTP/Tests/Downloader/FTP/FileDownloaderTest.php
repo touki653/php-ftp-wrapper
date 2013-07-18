@@ -44,7 +44,7 @@ class FileDownloaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     * @expectedExceptionMessage Invalid remote file given, expected instance of File, got Touki\FTP\Model\Directory
      */
     public function testDownloadWrongFilesystemInstance()
     {
@@ -55,18 +55,18 @@ class FileDownloaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     * @expectedExceptionMessage Invalid local file given. Expected filename, got resource
      */
     public function testDownloadResourceGiven()
     {
         $local = fopen($this->local, 'w+');
-        
+
         $this->downloader->download($local, $this->remote, $this->options);
     }
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     * @expectedExceptionMessage Invalid local file given. Expected filename, got directory
      */
     public function testDownloadDirectoryGiven()
     {
@@ -77,7 +77,7 @@ class FileDownloaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     * @expectedExceptionMessage Invalid option given. Expected false as FTP::NON_BLOCKING parameter
      */
     public function testDownloadNoOptionNonBlocking()
     {
@@ -86,7 +86,7 @@ class FileDownloaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Download arguments given do not match with the downloader
+     * @expectedExceptionMessage Invalid option given. Expected false as FTP::NON_BLOCKING parameter
      */
     public function testDownloadWrongOptionNonBlocking()
     {

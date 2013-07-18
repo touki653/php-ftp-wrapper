@@ -13,7 +13,7 @@ use Touki\FTP\Exception\DirectoryException;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FTP
+class FTP implements FTPInterface
 {
     const NON_BLOCKING          = 1;
     const NON_BLOCKING_CALLBACK = 2;
@@ -21,57 +21,99 @@ class FTP
     const START_POS             = 4;
 
     /**
-     * FTP Wrapper
-     * @var FTPWrapper
-     */
-    protected $ftp;
-
-    /**
-     * Directory Walker
+     * Filesystem manager
      * @var FTPFilesystemManager
      */
-    protected $walker;
+    protected $manager;
+
+    /**
+     * Downloader Voter
+     * @var DownloaderVoterInterface
+     */
+    protected $dlVoter;
+
+    /**
+     * Uploader Voter
+     * @var UploaderVoterInterface
+     */
+    protected $ulVoter;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper           $ftp    The FTP Wrapper
-     * @param FTPFilesystemManager $walker Directory Walker
+     * @param FTPFilesystemManager $manager Directory manager
      */
-    public function __construct(FTPWrapper $ftp, FTPFilesystemManager $walker)
+    public function __construct(FTPFilesystemManager $manager, DownloaderVoterInterface $dlVoter, UploaderVoterInterface $ulVoter)
     {
-        $this->ftp    = $ftp;
-        $this->walker = $walker;
+        $this->manager = $manager;
+        $this->dlVoter = $dlVoter;
+        $this->ulVoter = $ulVoter;
+    }
+
+    /**
+     * Get Manager
+     *
+     * @return FTPFilesystemManager Filesystem manager
+     */
+    public function getManager()
+    {
+        return $this->manager;
+    }
+
+    /**
+     * Get DownloaderVoter
+     *
+     * @return DownloaderVoterInterface Downloader Voter
+     */
+    public function getDownloaderVoter()
+    {
+        return $this->dlVoter;
+    }
+
+    /**
+     * Set DownloaderVoter
+     *
+     * @param DownloaderVoterInterface $downloaderVoter Downloader Voter
+     */
+    public function setDownloaderVoter(DownloaderVoterInterface $downloaderVoter)
+    {
+        $this->dlVoter = $downloaderVoter;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function findFilesystems(Directory $directory = null)
+    public function findFilesystems(Directory $directory)
     {
-        $directory = $directory ?: new Directory('/');
-
-        return $this->walker->findAll($directory);
+        return $this->manager->findAll($directory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function findFiles(Directory $directory = null)
+    public function findFiles(Directory $directory)
     {
-        $directory = $directory ?: new Directory('/');
-
-        return $this->walker->findFiles($directory);
+        return $this->manager->findFiles($directory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function findDirectories(Directory $directory = null)
+    public function findDirectories(Directory $directory)
     {
-        $directory = $directory ?: new Directory('/');
+        return $this->manager->findDirectories($directory);
+    }
 
-        return $this->walker->findDirectories($directory);
+    /**
+     * {@inheritDoc}
+     */
+    public function filesystemExists(Filesystem $fs)
+    {
+        try {
+            return null !== $this->manager->findFilesystemByFilesystem($fs);
+        } catch (DirectoryException $e) {
+            return false;
+        }
     }
 
     /**
@@ -80,7 +122,7 @@ class FTP
     public function fileExists(File $file)
     {
         try {
-            return null !== $this->walker->findFileByFile($file);
+            return null !== $this->manager->findFileByFile($file);
         } catch (DirectoryException $e) {
             return false;
         }
@@ -92,7 +134,7 @@ class FTP
     public function directoryExists(Directory $directory)
     {
         try {
-            return null !== $this->walker->findDirectoryByDirectory($directory);
+            return null !== $this->manager->findDirectoryByDirectory($directory);
         } catch (DirectoryException $e) {
             return false;
         }
@@ -101,9 +143,17 @@ class FTP
     /**
      * {@inheritDoc}
      */
+    public function findFilesystemByName($filename)
+    {
+        return $this->manager->findFilesystemByName($filename);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function findFileByName($filename)
     {
-        return $this->walker->findFileByName($filename);
+        return $this->manager->findFileByName($filename);
     }
 
     /**
@@ -111,7 +161,7 @@ class FTP
      */
     public function findDirectoryByName($directory)
     {
-        return $this->walker->findDirectoryByName($directory);
+        return $this->manager->findDirectoryByName($directory);
     }
 
     /**
@@ -119,5 +169,32 @@ class FTP
      */
     public function download($local, Filesystem $remote, array $options = array())
     {
+        if (!$this->filesystemExists($remote)) {
+            throw new DirectoryException(sprintf(
+                "Remote filesystem %s of type %s does not exists",
+                $remote->getRealpath(),
+                get_class($remote)
+            ));
+        }
+
+        $options = $options + array(
+            FTP::NON_BLOCKING => false
+        );
+        $downloader = $this->dlVoter->vote($local, $remote, $options);
+
+        return $downloader->download($local, $remote, $options);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function upload(Filesystem $remote, $local, array $options = array())
+    {
+        $options = $options + array(
+            FTP::NON_BLOCKING => false
+        );
+        $uploader = $this->ulVoter->vote($remote, $local, $options);
+
+        return $upload->upload($remote, $local, $options);
     }
 }

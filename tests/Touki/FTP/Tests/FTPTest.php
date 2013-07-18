@@ -2,11 +2,8 @@
 
 namespace Touki\FTP\Tests;
 
-use Touki\FTP\FilesystemFactory;
-use Touki\FTP\PermissionsFactory;
-use Touki\FTP\FTPWrapper;
 use Touki\FTP\FTP;
-use Touki\FTP\Manager\FTPFilesystemManager;
+use Touki\FTP\FTPFactory;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\Model\File;
 
@@ -21,11 +18,8 @@ class FTPTest extends ConnectionAwareTestCase
     {
         parent::setUp();
 
-        $connection    = self::$connection;
-        $this->factory = new FilesystemFactory(new PermissionsFactory);
-        $this->wrapper = new FTPWrapper($connection);
-        $this->walker  = new FTPFilesystemManager($this->wrapper, $this->factory);
-        $this->ftp     = new FTP($this->wrapper, $this->walker);
+        $factory = new FTPFactory;
+        $this->ftp = $factory->build(self::$connection);
     }
 
     public function testFindFilesystems()
@@ -201,5 +195,28 @@ class FTPTest extends ConnectionAwareTestCase
     {
         $this->assertNull($this->ftp->findDirectoryByName('bar'));
         $this->assertNull($this->ftp->findDirectoryByName('folder/baz'));
+    }
+
+    /**
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Remote filesystem foo of type Touki\FTP\Model\File does not exists
+     */
+    public function testDownloadNonExistantRemote()
+    {
+        $local  = tempnam(sys_get_temp_dir(), 'ftpdownload');
+        $remote = new File('foo');
+
+        $this->ftp->download($local, $remote);
+    }
+
+    public function testDownload()
+    {
+        $local  = tempnam(sys_get_temp_dir(), 'ftpdownload');
+        $remote = $this->ftp->findFileByName('file1.txt');
+
+        $this->assertTrue($this->ftp->download($local, $remote));
+        $this->assertFileExists($local);
+
+        unlink($local);
     }
 }
