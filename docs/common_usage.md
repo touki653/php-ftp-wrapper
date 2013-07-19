@@ -222,7 +222,7 @@ $ftp->download($handle, $file);
 
 You can also specify options passed to it
 
-```
+```php
 <?php
 
 $options = array(
@@ -254,7 +254,7 @@ $ftp->upload(new File('newfile.txt'), $handle);
 
 You can also specify options passed to it
 
-```
+```php
 <?php
 
 $options = array(
