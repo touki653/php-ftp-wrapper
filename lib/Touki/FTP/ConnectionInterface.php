@@ -15,4 +15,11 @@ interface ConnectionInterface
      * @return resource FTP Connection stream
      */
     public function getStream();
+
+    /**
+     * Tells wether the connection is established
+     *
+     * @return boolean TRUE if connected, FALSE if not
+     */
+    public function isConnected();
 }

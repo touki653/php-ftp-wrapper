@@ -43,7 +43,7 @@ class FTPFilesystemManager
     /**
      * Filters results with the given callable
      *
-     * @param  string   $directory Directory to traverse
+     * @param  mixed    $directory Directory name or instance to traverse
      * @param  callable $callable  A Callable filter
      * @return array    Fetched filesystems
      *

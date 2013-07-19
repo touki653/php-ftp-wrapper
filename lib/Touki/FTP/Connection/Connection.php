@@ -140,9 +140,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * Returns whether the connection is active
-     *
-     * @return boolean
+     * {@inheritDoc}
      */
     public function isConnected()
     {
