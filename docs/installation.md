@@ -6,7 +6,7 @@ Just add the following lines in your `composer.json`
 ```json
 {
     "require": {
-        "touki/ftp-wrapper": "1.0.*"
+        "touki/ftp": "1.0.*"
     }
 }
 ```
@@ -14,7 +14,7 @@ Just add the following lines in your `composer.json`
 Then run
 
 ```sh
-$ composer install touki/ftp-wrapper
+$ composer install touki/ftp
 ```
 
 You now should be able to use the library.
