@@ -97,6 +97,13 @@ interface FTPInterface
     public function findDirectoryByName($directory);
 
     /**
+     * Returns the current working directory
+     *
+     * @return Directory A Directory instance
+     */
+    public function getCwd();
+
+    /**
      * Downloads a remote Filesystem into the given local
      *
      * @param  mixed      $local   Local file, resource

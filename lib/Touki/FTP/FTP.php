@@ -178,6 +178,14 @@ class FTP implements FTPInterface
     /**
      * {@inheritDoc}
      */
+    public function getCwd()
+    {
+        return $this->manager->getCwd();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function download($local, Filesystem $remote, array $options = array())
     {
         if (!$this->filesystemExists($remote)) {

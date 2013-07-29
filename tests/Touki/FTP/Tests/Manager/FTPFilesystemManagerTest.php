@@ -32,9 +32,9 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
     {
         parent::setUp();
 
-        $wrapper = new FTPWrapper(self::$connection);
+        $this->wrapper = new FTPWrapper(self::$connection);
         $factory = new FilesystemFactory(new PermissionsFactory);
-        $this->manager = new FTPFilesystemManager($wrapper, $factory);
+        $this->manager = new FTPFilesystemManager($this->wrapper, $factory);
     }
 
     public function testFindAll()
@@ -148,5 +148,24 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
 
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
         $this->assertEquals('/folder/subfolder', $dir->getRealpath());
+    }
+
+    public function testGetCwd()
+    {
+        $this->wrapper->chdir("folder");
+
+        $dir = $this->manager->getCwd();
+
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/folder', $dir->getRealpath());
+
+        $this->wrapper->chdir('subfolder');
+
+        $dir = $this->manager->getCwd();
+
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/folder/subfolder', $dir->getRealpath());
+
+        $this->wrapper->chdir('/');
     }
 }

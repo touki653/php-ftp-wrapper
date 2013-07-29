@@ -245,4 +245,16 @@ class FTPFilesystemManager
     {
         return $this->findDirectoryByName($dir->getRealpath());
     }
+
+    /**
+     * Returns the current working directory
+     *
+     * @return Directory Current directory
+     */
+    public function getCwd()
+    {
+        $path = $this->wrapper->pwd();
+
+        return $this->findDirectoryByName($path);
+    }
 }
