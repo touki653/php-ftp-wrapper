@@ -78,7 +78,7 @@ interface FTPInterface
      * @param  string     $filename Filesystem name
      * @return Filesystem A Filesystem instance, NULL if it doesn't exists
      */
-    public function findFilesystemByName($filename);
+    public function findFilesystemByName($filename, Directory $inDirectory = null);
 
     /**
      * Finds a remote File by its name
@@ -86,7 +86,7 @@ interface FTPInterface
      * @param  string $filename File name
      * @return File   A File instance, NULL if it doesn't exists
      */
-    public function findFileByName($filename);
+    public function findFileByName($filename, Directory $inDirectory = null);
 
     /**
      * Finds a directory by its name
@@ -94,7 +94,7 @@ interface FTPInterface
      * @param  string    $directory Directory name
      * @return Directory A Directory instance, NULL if it doesn't exists
      */
-    public function findDirectoryByName($directory);
+    public function findDirectoryByName($directory, Directory $inDirectory = null);
 
     /**
      * Returns the current working directory

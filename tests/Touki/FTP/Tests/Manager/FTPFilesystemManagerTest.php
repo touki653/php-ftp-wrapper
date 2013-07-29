@@ -33,7 +33,7 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
         parent::setUp();
 
         $this->wrapper = new FTPWrapper(self::$connection);
-        $factory = new FilesystemFactory(new PermissionsFactory);
+        $factory       = new FilesystemFactory(new PermissionsFactory);
         $this->manager = new FTPFilesystemManager($this->wrapper, $factory);
     }
 
@@ -82,6 +82,23 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
         $this->assertEquals('/folder/file3.txt', $file->getRealpath());
     }
 
+    public function testFindFileByNameWithDirectory()
+    {
+        $file = $this->manager->findFileByName('file3.txt', new Directory('/folder'));
+
+        $this->assertInstanceOf('Touki\FTP\Model\File', $file);
+        $this->assertEquals('/folder/file3.txt', $file->getRealpath());
+    }
+
+    /**
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
+     */
+    public function testFindFileByNameNotFoundWithDirectory()
+    {
+        $dir = $this->manager->findFileByName('subfolder', new Directory('/foo'));
+    }
+
     public function testFindFileByNameNotDirectory()
     {
         $file = $this->manager->findFileByName("/folder");
@@ -114,6 +131,23 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
 
         $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
         $this->assertEquals('/folder', $dir->getRealpath());
+    }
+
+    public function testFindDirectoryByNameWithDirectory()
+    {
+        $dir = $this->manager->findDirectoryByName('subfolder', new Directory('/folder'));
+
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/folder/subfolder', $dir->getRealpath());
+    }
+
+    /**
+     * @expectedException        Touki\FTP\Exception\DirectoryException
+     * @expectedExceptionMessage Directory /foo not found
+     */
+    public function testFindDirectoryByNameNotFoundWithDirectory()
+    {
+        $dir = $this->manager->findDirectoryByName('subfolder', new Directory('/foo'));
     }
 
     public function testFindDirectoryByNameFileGiven()

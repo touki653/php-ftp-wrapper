@@ -154,25 +154,25 @@ class FTP implements FTPInterface
     /**
      * {@inheritDoc}
      */
-    public function findFilesystemByName($filename)
+    public function findFilesystemByName($filename, Directory $inDirectory = null)
     {
-        return $this->manager->findFilesystemByName($filename);
+        return $this->manager->findFilesystemByName($filename, $inDirectory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function findFileByName($filename)
+    public function findFileByName($filename, Directory $inDirectory = null)
     {
-        return $this->manager->findFileByName($filename);
+        return $this->manager->findFileByName($filename, $inDirectory);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function findDirectoryByName($directory)
+    public function findDirectoryByName($directory, Directory $inDirectory = null)
     {
-        return $this->manager->findDirectoryByName($directory);
+        return $this->manager->findDirectoryByName($directory, $inDirectory);
     }
 
     /**

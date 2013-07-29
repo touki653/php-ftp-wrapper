@@ -168,13 +168,21 @@ class FTPFilesystemManager
     /**
      * Finds a filesystem by its name
      *
-     * @param  string     $name Filesystem name
+     * @param  string         $name        Filesystem name
+     * @param  Directory|null $inDirectory Directory to fetch in
      * @return Filesystem
      */
-    public function findFilesystemByName($name)
+    public function findFilesystemByName($name, Directory $inDirectory = null)
     {
-        $name      = '/'.ltrim($name, '/');
-        $directory = dirname($name);
+        $name = '/'.ltrim($name, '/');
+
+        if ($inDirectory) {
+            $name      = $inDirectory->getRealpath().$name;
+            $directory = $inDirectory;
+        } else {
+            $directory = dirname($name);
+        }
+
 
         return $this->findOneBy($directory, function ($item) use ($name) {
             return $name == $item->getRealpath();
@@ -198,10 +206,16 @@ class FTPFilesystemManager
      * @param  string $name File path
      * @return File   Fetched file
      */
-    public function findFileByName($name)
+    public function findFileByName($name, Directory $inDirectory = null)
     {
-        $name = '/'.ltrim($name, "/");
-        $directory = dirname($name);
+        $name = '/'.ltrim($name, '/');
+
+        if ($inDirectory) {
+            $name      = $inDirectory->getRealpath().$name;
+            $directory = $inDirectory;
+        } else {
+            $directory = dirname($name);
+        }
 
         return $this->findOneBy($directory, function($item) use ($name) {
             return $name == $item->getRealpath() && ($item instanceof File);
@@ -225,10 +239,16 @@ class FTPFilesystemManager
      * @param  string    $name Directory name
      * @return Directory Fetched directory
      */
-    public function findDirectoryByName($name)
+    public function findDirectoryByName($name, Directory $inDirectory = null)
     {
         $name = '/'.ltrim($name, '/');
-        $directory = dirname($name);
+
+        if ($inDirectory) {
+            $name      = $inDirectory->getRealpath().$name;
+            $directory = $inDirectory;
+        } else {
+            $directory = dirname($name);
+        }
 
         return $this->findOneBy($directory, function($item) use ($name) {
             return $name == $item->getRealpath() && ($item instanceof Directory);
