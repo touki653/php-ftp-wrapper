@@ -126,6 +126,7 @@ $wrapper->get(__DIR__.'/foofile.txt', '/folder/foofile.txt');
 $connection->close();
 
 ?>
+```
 
 Next step: [Common Usage]
 
