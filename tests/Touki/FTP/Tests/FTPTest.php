@@ -230,4 +230,12 @@ class FTPTest extends ConnectionAwareTestCase
 
         unlink($local);
     }
+
+    public function testFindFileByNameFromCwd()
+    {
+        $file = $this->ftp->findFileByName('file1.txt', $this->ftp->getCwd());
+
+        $this->assertInstanceOf('Touki\FTP\Model\File', $file);
+        $this->assertEquals('/file1.txt', $file->getRealpath());
+    }
 }

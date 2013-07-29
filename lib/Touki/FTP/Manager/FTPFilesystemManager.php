@@ -183,7 +183,6 @@ class FTPFilesystemManager
             $directory = dirname($name);
         }
 
-
         return $this->findOneBy($directory, function ($item) use ($name) {
             return $name == $item->getRealpath();
         });
