@@ -214,6 +214,6 @@ class FTP implements FTPInterface
         );
         $uploader = $this->ulVoter->vote($remote, $local, $options);
 
-        return $upload->upload($remote, $local, $options);
+        return $uploader->upload($remote, $local, $options);
     }
 }
