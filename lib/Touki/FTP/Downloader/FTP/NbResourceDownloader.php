@@ -7,7 +7,7 @@
  * distributed with this source code
  *
  * @package FTP Wrapper
- * @version 1.0.0
+ * @version 1.0.1
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
