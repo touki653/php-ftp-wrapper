@@ -11,6 +11,8 @@ $connection = new Connection('host', 'user', 'password');
 $connection = new AnonymousConnection('host');
 $connection = new SSLConnection('host', 'user', 'password');
 
+$connection->open();
+
 ?>
 ```
 
@@ -24,7 +26,7 @@ The easiest way to instanciate the main FTP helper is to use its factory
 use Touki\FTP\FTPFactory;
 
 $factory = new FTPFactory;
-$ftp     = $factory->build($connection);
+$ftp = $factory->build($connection);
 
 ?>
 ```
