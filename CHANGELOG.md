@@ -4,6 +4,7 @@ dev-master
  * Added `$connection->open()` to docs
  * Added changelog
  * Moved Manager dependency from `FilesystemFactory` to `FilesystemFactoryInterface`
+ * Added `WindowsFilesystemFactory`
 
 1.0.1
 -----
