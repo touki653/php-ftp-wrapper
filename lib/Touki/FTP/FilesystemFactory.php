@@ -23,7 +23,7 @@ use Touki\FTP\Model\Directory;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FilesystemFactory
+class FilesystemFactory implements FilesystemFactoryInterface
 {
     /**
      * A Permissions Factory
@@ -42,10 +42,7 @@ class FilesystemFactory
     }
 
     /**
-     * Builds a file from a given input line
-     *
-     * @param  string     $input Input string
-     * @return Filesystem Newly created File object
+     * {@inheritDoc}
      */
     public function build($input, $prefix = '')
     {

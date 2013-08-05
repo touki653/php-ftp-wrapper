@@ -14,7 +14,7 @@
 namespace Touki\FTP\Manager;
 
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\FilesystemFactory;
+use Touki\FTP\FilesystemFactoryInterface;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
@@ -42,10 +42,10 @@ class FTPFilesystemManager
     /**
      * Constructor
      *
-     * @param FTPWrapper        $wrapper A FTPWrapper instance
-     * @param FilesystemFactory $factory A FilesystemFactory instance
+     * @param FTPWrapper                 $wrapper A FTPWrapper instance
+     * @param FilesystemFactoryInterface $factory A FilesystemFactory instance
      */
-    public function __construct(FTPWrapper $wrapper, FilesystemFactory $factory)
+    public function __construct(FTPWrapper $wrapper, FilesystemFactoryInterface $factory)
     {
         $this->wrapper = $wrapper;
         $this->factory = $factory;

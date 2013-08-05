@@ -3,6 +3,7 @@ dev-master
 
  * Added `$connection->open()` to docs
  * Added changelog
+ * Moved Manager dependency from `FilesystemFactory` to `FilesystemFactoryInterface`
 
 1.0.1
 -----
