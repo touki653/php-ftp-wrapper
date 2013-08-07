@@ -276,7 +276,7 @@ class FTPFilesystemManager
     }
 
     /**
-     * Creates a directory
+     * Creates a directory, recursively
      *
      * @param  Directory $directory Directory to create
      * @return boolean   Whether creation of directory succeeded
@@ -298,5 +298,16 @@ class FTPFilesystemManager
         }
 
         return true;
+    }
+
+    /**
+     * Deletes a directory, recursively
+     *
+     * @param  Directory $directory Directory to delete
+     * @return boolean   Whether deletion succeeded
+     */
+    public function rmdir(Directory $directory)
+    {
+
     }
 }

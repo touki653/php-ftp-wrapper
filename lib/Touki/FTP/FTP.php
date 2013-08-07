@@ -118,10 +118,10 @@ class FTP implements FTPInterface
     /**
      * {@inheritDoc}
      */
-    public function filesystemExists(Filesystem $fs)
+    public function filesystemExists(Filesystem $filesystem)
     {
         try {
-            return null !== $this->manager->findFilesystemByFilesystem($fs);
+            return null !== $this->manager->findFilesystemByFilesystem($filesystem);
         } catch (DirectoryException $e) {
             return false;
         }
