@@ -6,6 +6,7 @@ dev-master
  * Moved Manager dependency from `FilesystemFactory` to `FilesystemFactoryInterface`
  * Added `WindowsFilesystemFactory`
  * Introduced creators
+ * Added Getters to FTPFactory
 
 1.0.1
 -----

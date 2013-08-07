@@ -33,7 +33,8 @@ class RecursiveDirectoryCreator implements CreatorInterface, CreatorVotableInter
     /**
      * Constructor
      *
-     * @param FTPWrapper $wrapper A FTP Wrapper
+     * @param FTPWrapper           $wrapper A FTP Wrapper
+     * @param FTPFilesystemManager $manager A Manager instance
      */
     public function __construct(FTPWrapper $wrapper, FTPFilesystemManager $manager)
     {
