@@ -5,6 +5,7 @@ dev-master
  * Added changelog
  * Moved Manager dependency from `FilesystemFactory` to `FilesystemFactoryInterface`
  * Added `WindowsFilesystemFactory`
+ * Added Mkdir command
 
 1.0.1
 -----

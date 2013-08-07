@@ -216,4 +216,12 @@ class FTP implements FTPInterface
 
         return $uploader->upload($remote, $local, $options);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function mkdir(Directory $directory)
+    {
+        return $this->manager->mkdir($directory, $recursive);
+    }
 }

@@ -175,12 +175,11 @@ class FTPFilesystemManager
     public function findFilesystemByName($name, Directory $inDirectory = null)
     {
         $name = '/'.ltrim($name, '/');
+        $directory = dirname($name);
 
         if ($inDirectory) {
             $name      = $inDirectory->getRealpath().$name;
             $directory = $inDirectory;
-        } else {
-            $directory = dirname($name);
         }
 
         return $this->findOneBy($directory, function ($item) use ($name) {
@@ -207,13 +206,12 @@ class FTPFilesystemManager
      */
     public function findFileByName($name, Directory $inDirectory = null)
     {
-        $name = '/'.ltrim($name, '/');
+        $name      = '/'.ltrim($name, '/');
+        $directory = dirname($name);
 
         if ($inDirectory) {
             $name      = $inDirectory->getRealpath().$name;
             $directory = $inDirectory;
-        } else {
-            $directory = dirname($name);
         }
 
         return $this->findOneBy($directory, function($item) use ($name) {
@@ -275,5 +273,30 @@ class FTPFilesystemManager
         $path = $this->wrapper->pwd();
 
         return $this->findDirectoryByName($path);
+    }
+
+    /**
+     * Creates a directory
+     *
+     * @param  Directory $directory Directory to create
+     * @return boolean   Whether creation of directory succeeded
+     *
+     * @throws DirectoryException When the directory could not be created
+     */
+    public function mkdir(Directory $directory)
+    {
+        $full  = ltrim($directory->getRealpath(), '/');
+        $parts = explode('/', $full);
+        $path  = '';
+
+        foreach ($parts as $part) {
+            $path = sprintf("%s/%s", $path, $part);
+
+            if (null === $this->findDirectoryByName($path) && !$this->wrapper->mkdir($path)) {
+                throw new DirectoryException(sprintf("Could not create directory %s", $path));
+            }
+        }
+
+        return true;
     }
 }
