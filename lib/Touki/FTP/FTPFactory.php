@@ -22,6 +22,62 @@ use Touki\FTP\Manager\FTPFilesystemManager;
  */
 class FTPFactory
 {
+    protected $wrapper;
+    protected $manager;
+    protected $dlVoter;
+    protected $ulVoter;
+    protected $crVoter;
+
+    /**
+     * Get Wrapper
+     *
+     * @return FTPWrapper An FTPWrapper instance
+     */
+    public function getWrapper()
+    {
+        return $this->wrapper;
+    }
+
+    /**
+     * Get Manager
+     *
+     * @return FTPFilesystemManager A FilesystemManager instance
+     */
+    public function getManager()
+    {
+        return $this->manager;
+    }
+
+    /**
+     * Get DownloaderVoter
+     *
+     * @return DownloaderVoterInterface A Downloader voter
+     */
+    public function getDownloaderVoter()
+    {
+        return $this->dlVoter;
+    }
+
+    /**
+     * Get UploaderVoter
+     *
+     * @return UploaderVoterInterface An Uploader voter
+     */
+    public function getUploaderVoter()
+    {
+        return $this->uploaderVoter;
+    }
+
+    /**
+     * Get CreatorVoter
+     *
+     * @return CreatorVoter A Creator Voter
+     */
+    public function getCreatorVoter()
+    {
+        return $this->creatorVoter;
+    }
+
     /**
      * Creates an FTP instance
      *
@@ -33,20 +89,20 @@ class FTPFactory
             $connection->open();
         }
 
-        $wrapper = new FTPWrapper($connection);
+        $this->wrapper = new FTPWrapper($connection);
 
         $factory = new FilesystemFactory(new PermissionsFactory);
-        $manager = new FTPFilesystemManager($wrapper, $factory);
+        $this->manager = new FTPFilesystemManager($this->wrapper, $factory);
 
-        $dlVoter = new DownloaderVoter;
-        $dlVoter->addDefaultFTPDownloaders($wrapper);
+        $this->dlVoter = new DownloaderVoter;
+        $this->dlVoter->addDefaultFTPDownloaders($this->wrapper);
 
-        $ulVoter = new UploaderVoter;
-        $ulVoter->addDefaultFTPUploaders($wrapper);
+        $this->ulVoter = new UploaderVoter;
+        $this->ulVoter->addDefaultFTPUploaders($this->wrapper);
 
-        $crVoter = new CreatorVoter;
-        $crVoter->addDefaultFTPCreators($wrapper, $manager);
+        $this->crVoter = new CreatorVoter;
+        $this->crVoter->addDefaultFTPCreators($this->wrapper, $this->manager);
 
-        return new FTP($manager, $dlVoter, $ulVoter, $crVoter);
+        return new FTP($this->manager, $this->dlVoter, $this->ulVoter, $this->crVoter);
     }
 }

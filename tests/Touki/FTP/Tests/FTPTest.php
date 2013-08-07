@@ -31,6 +31,8 @@ class FTPTest extends ConnectionAwareTestCase
 
         $factory = new FTPFactory;
         $this->ftp = $factory->build(self::$connection);
+        $this->manager = $factory->getManager();
+        $this->wrapper = self::$wrapper;
     }
 
     public function testFindFilesystems()
@@ -237,5 +239,20 @@ class FTPTest extends ConnectionAwareTestCase
 
         $this->assertInstanceOf('Touki\FTP\Model\File', $file);
         $this->assertEquals('/file1.txt', $file->getRealpath());
+    }
+
+    public function testCreateRecursiveDirectoryByDefault()
+    {
+        $creation = new Directory('folder/tmpdir/tmpdirdeep');
+
+        $this->assertTrue($this->ftp->create($creation));
+
+        $dir = $this->manager->findDirectoryByDirectory($creation);
+
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/folder/tmpdir/tmpdirdeep', $dir->getRealpath());
+
+        $this->wrapper->rmdir('/folder/tmpdir/tmpdirdeep');
+        $this->wrapper->rmdir('/folder/tmpdir');
     }
 }

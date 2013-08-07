@@ -214,6 +214,9 @@ class FTP implements FTPInterface
      */
     public function create(Filesystem $filesystem, array $options = array())
     {
+        $options = $options + array(
+            FTP::RECURSIVE => true
+        );
         $creator = $this->creatorVoter->vote($filesystem, $options);
 
         return $creator->create($filesystem, $options);
