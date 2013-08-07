@@ -30,6 +30,7 @@ class FTP implements FTPInterface
     const NON_BLOCKING_CALLBACK = 2;
     const TRANSFER_MODE         = 3;
     const START_POS             = 4;
+    const RECURSIVE             = 5;
 
     /**
      * Filesystem manager
@@ -50,15 +51,26 @@ class FTP implements FTPInterface
     protected $ulVoter;
 
     /**
+     * Creator Voter
+     * @var CreatorVoter
+     */
+    protected $creatorVoter;
+
+    /**
      * Constructor
      *
      * @param FTPFilesystemManager $manager Directory manager
      */
-    public function __construct(FTPFilesystemManager $manager, DownloaderVoterInterface $dlVoter, UploaderVoterInterface $ulVoter)
-    {
-        $this->manager = $manager;
-        $this->dlVoter = $dlVoter;
-        $this->ulVoter = $ulVoter;
+    public function __construct(
+        FTPFilesystemManager $manager,
+        DownloaderVoterInterface $dlVoter,
+        UploaderVoterInterface $ulVoter,
+        CreatorVoter $creatorVoter
+    ) {
+        $this->manager      = $manager;
+        $this->dlVoter      = $dlVoter;
+        $this->ulVoter      = $ulVoter;
+        $this->creatorVoter = $creatorVoter;
     }
 
     /**
@@ -69,26 +81,6 @@ class FTP implements FTPInterface
     public function getManager()
     {
         return $this->manager;
-    }
-
-    /**
-     * Get DownloaderVoter
-     *
-     * @return DownloaderVoterInterface Downloader Voter
-     */
-    public function getDownloaderVoter()
-    {
-        return $this->dlVoter;
-    }
-
-    /**
-     * Set DownloaderVoter
-     *
-     * @param DownloaderVoterInterface $downloaderVoter Downloader Voter
-     */
-    public function setDownloaderVoter(DownloaderVoterInterface $downloaderVoter)
-    {
-        $this->dlVoter = $downloaderVoter;
     }
 
     /**
@@ -220,8 +212,10 @@ class FTP implements FTPInterface
     /**
      * {@inheritDoc}
      */
-    public function mkdir(Directory $directory)
+    public function create(Filesystem $filesystem, array $options = array())
     {
-        return $this->manager->mkdir($directory, $recursive);
+        $creator = $this->creatorVoter->vote($filesystem, $options);
+
+        return $creator->create($filesystem, $options);
     }
 }

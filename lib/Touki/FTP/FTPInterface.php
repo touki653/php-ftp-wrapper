@@ -122,12 +122,4 @@ interface FTPInterface
      * @return boolean    TRUE on success, FALSE on failure
      */
     public function upload(Filesystem $remote, $local, array $options = array());
-
-    /**
-     * Creates a directory, recursively
-     *
-     * @param  Directory $directory Directory to create
-     * @return boolean   Whether creation succeeded
-     */
-    public function mkdir(Directory $directory);
 }

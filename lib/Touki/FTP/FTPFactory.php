@@ -44,6 +44,9 @@ class FTPFactory
         $ulVoter = new UploaderVoter;
         $ulVoter->addDefaultFTPUploaders($wrapper);
 
-        return new FTP($manager, $dlVoter, $ulVoter);
+        $crVoter = new CreatorVoter;
+        $crVoter->addDefaultFTPCreators($wrapper, $manager);
+
+        return new FTP($manager, $dlVoter, $ulVoter, $crVoter);
     }
 }

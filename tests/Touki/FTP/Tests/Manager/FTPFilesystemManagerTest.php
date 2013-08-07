@@ -202,46 +202,4 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
 
         $this->wrapper->chdir('/');
     }
-
-    public function testMkdir()
-    {
-        $creation = new Directory('tmpdir');
-        $this->assertTrue($this->manager->mkdir($creation));
-
-        $dir = $this->manager->findDirectoryByDirectory($creation);
-
-        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
-        $this->assertEquals('/tmpdir', $dir->getRealpath());
-
-        $this->wrapper->rmdir('tmpdir');
-    }
-
-    public function testMkdirDeepFolderSingleToCreate()
-    {
-        $creation = new Directory('folder/subfolder/tmpdir');
-
-        $this->assertTrue($this->manager->mkdir($creation));
-
-        $dir = $this->manager->findDirectoryByDirectory($creation);
-
-        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
-        $this->assertEquals('/folder/subfolder/tmpdir', $dir->getRealpath());
-
-        $this->wrapper->rmdir('/folder/subfolder/tmpdir');
-    }
-
-    public function testMkdirDeepFolderMultiple()
-    {
-        $creation = new Directory('folder/tmpdir/tmpdirdeep');
-
-        $this->assertTrue($this->manager->mkdir($creation));
-
-        $dir = $this->manager->findDirectoryByDirectory($creation);
-
-        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
-        $this->assertEquals('/folder/tmpdir/tmpdirdeep', $dir->getRealpath());
-
-        $this->wrapper->rmdir('/folder/tmpdir/tmpdirdeep');
-        $this->wrapper->rmdir('/folder/tmpdir');
-    }
 }
