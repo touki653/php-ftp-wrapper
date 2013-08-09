@@ -28,6 +28,9 @@ use Touki\FTP\FTPFactory;
 $factory = new FTPFactory;
 $ftp = $factory->build($connection);
 
+$wrapper = $factory->getWrapper();
+$manager = $factory->getManager();
+
 ?>
 ```
 
@@ -38,8 +41,9 @@ Or you can instanciate the whole dependency pack to use its components the way y
 
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\FilesystemFactory;
 use Touki\FTP\PermissionsFactory;
+use Touki\FTP\FilesystemFactory;
+use Touki\FTP\WindowsFilesystemFactory;
 use Touki\FTP\DownloaderVoter;
 use Touki\FTP\UploaderVoter;
 use Touki\FTP\Manager\FTPFilesystemManager;
@@ -65,11 +69,17 @@ $permFactory = new PermissionsFactory;
 $fsFactory = new FilesystemFactory($permFactory);
 
 /**
+ * If your server runs on WINDOWS, you can use a Windows filesystem factory instead
+ */
+$fsFactory = new WindowsFilesystemFactory;
+
+/**
  * This manager focuses on operations on remote files and directories
  * It needs the FTPWrapper so as to do operations on the serveri
  * It needs the FilesystemFfactory so as to create models
  */
 $manager = new FTPFilesystemManager($wrapper, $fsFactory);
+
 
 /**
  * This is the downloader voter. It loads multiple DownloaderVotable class and
@@ -96,12 +106,26 @@ $ulVoter = new UploaderVoter;
 $ulVoter->addDefaultFTPUploaders($wrapper);
 
 /**
+ * This is the creator voter. It loads multiple CreatorVotable class and
+ * checks which one is needed on the given options
+ */
+$crVoter = new CreatorVoter;
+
+/**
+ * Loads up the default FTP creators.
+ * It needs the FTPWrapper and the FTPFilesystemManager to be able to share
+ * them whith the creators
+ */
+$crVoter->addDefaultFTPCreators($wrapper, $manager);
+
+/**
  * Finally creates the main FTP
  * It needs the manager to do operations on files
  * It needs the download voter to pick-up the right downloader on ->download
  * It needs the upload voter to pick-up the right uploader on ->upload
+ * It needs the creator voter to pick-up the right creator on ->create
  */
-return new FTP($manager, $dlVoter, $ulVoter);
+return new FTP($manager, $dlVoter, $ulVoter, $crVoter);
 
 ?>
 ```
