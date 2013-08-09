@@ -9,8 +9,7 @@ It wraps most common operations on FTP, the object oriented way.
 
  * [Documentation]
  * [Installation]
- * [Set Up]
- * [Common Usage]
+ * [Setup]
 
 [Documentation]: https://github.com/touki653/php-ftp-wrapper/blob/master/docs/
 [Installation]: https://github.com/touki653/php-ftp-wrapper/blob/master/docs/installation.md
