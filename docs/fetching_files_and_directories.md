@@ -1,6 +1,6 @@
-# Common usage
+# Fetching files and directories
 
-**Note:** All along the file we are assuming:
+**Note:** All along this file we are assuming:
 
  * `$ftp` is an instance of `Touki\FTP\FTP`
  * `Directory` is an alias of `Touki\FTP\Model\Directory`
@@ -106,7 +106,7 @@ array(3) {
 
 $file  = $ftp->findFileByName('file1.txt');
 $file2 = $ftp->findFileByName('nonexistant');
-$file3 = $ftp->findFileByName('folder/file3.txt');
+$file3 = $ftp->findFileByName('file3.txt', $inDirectory = new Directory('folder'));
 
 var_dump($file);
 var_dump($file2);
@@ -170,6 +170,7 @@ object (Touki\FTP\Model\File) {
 
 $dir = $ftp->findDirectoryByName('/folder');
 var_dump($dir);
+$dir = $ftp->findDirectoryByName('subfolder', $inDirectory = new Directory('folder'));
 
 ?>
 ```
@@ -199,72 +200,10 @@ object (Touki\FTP\Model\Directory) {
 }
 ```
 
-## Downloading a file
+## Fetching the current working directory
 
 ```php
 <?php
-
-$file = $ftp->findFileByName('file1.txt');
-
-if (null === $file) {
-    return;
-}
-
-// To a file
-$ftp->download('/path/to/download/file1.txt', $file);
-
-// To an handle
-$handle = fopen('/path/to/download/file1.txt', 'w+');
-$ftp->download($handle, $file);
-
-?>
-```
-
-You can also specify options passed to it
-
-```php
-<?php
-
-$options = array(
-    FTP::NON_BLOCKING  => false,     // Whether to deal with a callback while downloading
-    FTP::NON_BLOCKING_CALLBACK => function() { }, // Callback to execute
-    FTP::START_POS     => 0,         // File pointer to start downloading from
-    FTP::TRANSFER_MODE => FTP_BINARY // Transfer Mode 
-);
-
-$ftp->download('/path/to/download/file1.txt', $file, $options);
-
-?>
-```
-
-## Uploading a file
-
-```php
-<?php
-
-// From a file
-$ftp->upload(new File('newfile.txt'), '/path/to/upload/file1.txt');
-
-// To an handle
-$handle = fopen('/path/to/upload/file1.txt', 'w+');
-$ftp->upload(new File('newfile.txt'), $handle);
-
-?>
-```
-
-You can also specify options passed to it
-
-```php
-<?php
-
-$options = array(
-    FTP::NON_BLOCKING  => false,     // Whether to deal with a callback while uploading
-    FTP::NON_BLOCKING_CALLBACK => function() { }, // Callback to execute
-    FTP::START_POS     => 0,         // File pointer to start uploading from
-    FTP::TRANSFER_MODE => FTP_BINARY // Transfer Mode
-);
-
-$ftp->download('/path/to/upload/file1.txt', $file, $options);
-
+$dir = $ftp->getCwd();
 ?>
 ```

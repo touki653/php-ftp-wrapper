@@ -19,6 +19,6 @@ $ composer install touki/ftp
 
 You now should be able to use the library.
 
-Next step: [SetUp]
+Next step: [Setup]
 
-[SetUp]: https://github.com/touki653/php-ftp-wrapper/blob/master/docs/setup.md
+[Setup]: https://github.com/touki653/php-ftp-wrapper/blob/master/docs/setup.md

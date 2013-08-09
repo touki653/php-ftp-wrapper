@@ -153,7 +153,3 @@ $connection->close();
 
 ?>
 ```
-
-Next step: [Common Usage]
-
-[Common Usage]: https://github.com/touki653/php-ftp-wrapper/blob/master/docs/common_usage.md
