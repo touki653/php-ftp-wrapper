@@ -334,7 +334,7 @@ class FTPWrapper
      * Allocates space for a file to be uploaded
      * @link http://php.net/ftp_alloc
      *
-     * @param integer $filesize The number of bytes to allocate
+     * @param  integer $filesize The number of bytes to allocate
      * @param  string  &$result  A textual representation of the servers response
      * @return boolean TRUE on success, FALSE on failure
      */

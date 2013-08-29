@@ -57,6 +57,12 @@ class FTP implements FTPInterface
     protected $creatorVoter;
 
     /**
+     * Deleter Voter
+     * @var DeleterVoter
+     */
+    protected $deleterVoter;
+
+    /**
      * Constructor
      *
      * @param FTPFilesystemManager $manager Directory manager
@@ -65,12 +71,14 @@ class FTP implements FTPInterface
         FTPFilesystemManager $manager,
         DownloaderVoterInterface $dlVoter,
         UploaderVoterInterface $ulVoter,
-        CreatorVoter $creatorVoter
+        CreatorVoter $creatorVoter,
+        DeleterVoter $deleterVoter
     ) {
         $this->manager      = $manager;
         $this->dlVoter      = $dlVoter;
         $this->ulVoter      = $ulVoter;
         $this->creatorVoter = $creatorVoter;
+        $this->deleterVoter = $deleterVoter;
     }
 
     /**
@@ -220,5 +228,18 @@ class FTP implements FTPInterface
         $creator = $this->creatorVoter->vote($filesystem, $options);
 
         return $creator->create($filesystem, $options);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function delete(Filesystem $filesystem, array $options = array())
+    {
+        $options = $options + array(
+            FTP::RECURSIVE => true
+        );
+        $deleter = $this->deleterVoter->vote($filesystem, $options);
+
+        return $deleter->delete($filesystem, $options);
     }
 }

@@ -27,6 +27,7 @@ class FTPFactory
     protected $dlVoter;
     protected $ulVoter;
     protected $crVoter;
+    protected $deVoter;
 
     /**
      * Get Wrapper
@@ -65,7 +66,7 @@ class FTPFactory
      */
     public function getUploaderVoter()
     {
-        return $this->uploaderVoter;
+        return $this->ulVoter;
     }
 
     /**
@@ -75,7 +76,17 @@ class FTPFactory
      */
     public function getCreatorVoter()
     {
-        return $this->creatorVoter;
+        return $this->crVoter;
+    }
+
+    /**
+     * Get DeleterVoter
+     *
+     * @return DeleterVoter A Deleter Voter
+     */
+    public function getDeleterVoter()
+    {
+        return $this->deVoter;
     }
 
     /**
@@ -103,6 +114,9 @@ class FTPFactory
         $this->crVoter = new CreatorVoter;
         $this->crVoter->addDefaultFTPCreators($this->wrapper, $this->manager);
 
-        return new FTP($this->manager, $this->dlVoter, $this->ulVoter, $this->crVoter);
+        $this->deVoter = new DeleterVoter;
+        $this->deVoter->addDefaultFTPDeleters($this->wrapper, $this->manager);
+
+        return new FTP($this->manager, $this->dlVoter, $this->ulVoter, $this->crVoter, $this->deVoter);
     }
 }

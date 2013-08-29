@@ -122,4 +122,13 @@ interface FTPInterface
      * @return boolean    TRUE on success, FALSE on failure
      */
     public function upload(Filesystem $remote, $local, array $options = array());
+
+    /**
+     * Creates a Filesystem on remote server
+     *
+     * @param  Filesystem $filesystem Filesystem to create
+     * @param  array      $options    Creator's options
+     * @return boolean    TRUE on success, FALSE on failure
+     */
+    public function create(Filesystem $filesystem, array $options = array());
 }
