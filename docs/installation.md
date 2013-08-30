@@ -6,7 +6,7 @@ Just add the following lines in your `composer.json`
 ```json
 {
     "require": {
-        "touki/ftp": "1.0.*"
+        "touki/ftp": "1.1.*"
     }
 }
 ```

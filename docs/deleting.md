@@ -13,9 +13,9 @@ This sample will delete all files and directories given in the remote Directory
 ```php
 <?php
 
-$path = '/remote/path/to/delete';
+$dir = $ftp->findDirectoryByName('/folder');
 
-$ftp->delete(new Directory($path));
+$ftp->delete($dir);
 
 ?>
 ```

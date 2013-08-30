@@ -30,11 +30,41 @@ $ftp = $factory->build($connection);
 
 $wrapper = $factory->getWrapper();
 $manager = $factory->getManager();
+$dlVoter = $factory->getDownloaderVoter();
+$ulVoter = $factory->getUploaderVoter();
+$clVoter = $factory->getCreatorVoter();
+$dlVoter = $factory->getDeleterVoter();
 
 ?>
 ```
 
-Or you can instanciate the whole dependency pack to use its components the way you want
+# Using the simple wrapper
+
+If you just plan to use the simple wrapper, you can instanciate it this way
+
+```php
+<?php
+
+use Touki\FTP\Connection\Connection;
+use Touki\FTP\FTPWrapper;
+
+$connection = new Connection('host', 'user', 'password');
+$connection->open();
+
+$wrapper = new FTPWrapper($connection);
+
+$wrapper->chdir("/folder");
+$wrapper->cdup();
+$wrapper->get(__DIR__.'/foofile.txt', '/folder/foofile.txt');
+
+$connection->close();
+
+?>
+```
+
+# Whole package
+
+You can instanciate the whole dependency pack to use its components the way you want
 
 ```php
 <?php
@@ -46,6 +76,8 @@ use Touki\FTP\FilesystemFactory;
 use Touki\FTP\WindowsFilesystemFactory;
 use Touki\FTP\DownloaderVoter;
 use Touki\FTP\UploaderVoter;
+use Touki\FTP\CreatorVoter;
+use Touki\FTP\DeleterVoter;
 use Touki\FTP\Manager\FTPFilesystemManager;
 
 /**
@@ -119,37 +151,28 @@ $crVoter = new CreatorVoter;
 $crVoter->addDefaultFTPCreators($wrapper, $manager);
 
 /**
+ * This is the deleter voter. It loads multiple DeleterVotable classes and
+ * checks which one is needed on the given options
+ */
+$deVoter = new DeleterVoter;
+
+/**
+ * Loads up the default FTP deleters.
+ * It needs the FTPWrapper and the FTPFilesystemManager to be able to share
+ * them with the deleters
+ */
+$deVoter->addDefaultFTPDeleters($wrapper, $manager);
+
+/**
  * Finally creates the main FTP
  * It needs the manager to do operations on files
  * It needs the download voter to pick-up the right downloader on ->download
  * It needs the upload voter to pick-up the right uploader on ->upload
  * It needs the creator voter to pick-up the right creator on ->create
+ * It needs the deleter voter to pick-up the right creator on ->delete
  */
-return new FTP($manager, $dlVoter, $ulVoter, $crVoter);
+return new FTP($manager, $dlVoter, $ulVoter, $crVoter, $deVoter);
 
 ?>
 ```
 
-# Using the simple wrapper
-
-If you just plan to use the simple wrapper, you can instanciate it this way
-
-```php
-<?php
-
-use Touki\FTP\Connection\Connection;
-use Touki\FTP\FTPWrapper;
-
-$connection = new Connection('host', 'user', 'password');
-$connection->open();
-
-$wrapper = new FTPWrapper($connection);
-
-$wrapper->chdir("/folder");
-$wrapper->cdup();
-$wrapper->get(__DIR__.'/foofile.txt', '/folder/foofile.txt');
-
-$connection->close();
-
-?>
-```
