@@ -19,10 +19,11 @@ class WindowsFilesystemFactory implements FilesystemFactoryInterface
      */
     public function build($input, $prefix = '')
     {
-        $prefix = rtrim($prefix, '/');
-        $parts  = preg_split("/\s+/", $input);
+        $prefix    = rtrim($prefix, '/');
+        $parts     = preg_split("/\s+/", $input);
         $inputdate = sprintf("%s %s", $parts[0], $parts[1]);
-        $date = \DateTime::createFromFormat('m-d-y H:iA', $inputdate);
+        $date      = \DateTime::createFromFormat('m-d-y H:iA', $inputdate);
+        $name      = implode(' ', array_slice($parts, 3));
 
         if ($parts[2] == '<DIR>') {
             $size = 0;
@@ -33,7 +34,7 @@ class WindowsFilesystemFactory implements FilesystemFactoryInterface
         }
 
         $file
-            ->setRealpath(sprintf("%s/%s", $prefix, $parts[3]))
+            ->setRealpath(sprintf("%s/%s", $prefix, $name))
             ->setSize($size)
             ->setMtime($date)
         ;

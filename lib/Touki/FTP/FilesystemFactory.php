@@ -52,6 +52,7 @@ class FilesystemFactory implements FilesystemFactoryInterface
         $filesystem = $this->resolveFile($type);
         $permParts  = str_split(substr($parts[0], 1, 9), 3);
         $hours      = sscanf($parts[7], "%d:%d");
+        $name       = implode(' ', array_slice($parts, 8));
 
         if (null === $hours[1]) {
             $year  = $hours[0];
@@ -63,7 +64,7 @@ class FilesystemFactory implements FilesystemFactoryInterface
         $date = new \DateTime(sprintf("%s-%s-%s %s:%s", $year, $parts[5], $parts[6], $hours[0], $hours[1]));
 
         $filesystem
-            ->setRealpath(sprintf("%s/%s", $prefix, $parts[8]))
+            ->setRealpath(sprintf("%s/%s", $prefix, $name))
             ->setOwnerPermissions($this->permissionsFactory->build($permParts[0]))
             ->setGroupPermissions($this->permissionsFactory->build($permParts[1]))
             ->setGuestPermissions($this->permissionsFactory->build($permParts[2]))
