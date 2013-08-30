@@ -48,4 +48,15 @@ class WindowsFileFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($file->getSize(), 17919077);
         $this->assertEquals($file->getMtime(), \DateTime::createFromFormat("Y-d-m H:i:s", "2013-25-07 05:49:00"));
     }
+
+    public function testBuildFileWithSpaces()
+    {
+        $input = "07-25-13  05:49AM             17919077 dummy spaced filename";
+        $file = $this->factory->build($input, '/folder');
+
+        $this->assertInstanceOf('Touki\FTP\Model\File', $file);
+        $this->assertEquals($file->getRealpath(), '/folder/dummy spaced filename');
+        $this->assertEquals($file->getSize(), 17919077);
+        $this->assertEquals($file->getMtime(), \DateTime::createFromFormat("Y-d-m H:i:s", "2013-25-07 05:49:00"));
+    }
 }
