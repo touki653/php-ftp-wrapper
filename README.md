@@ -11,7 +11,7 @@ It wraps most common operations on FTP, the object oriented way.
  * [Installation]
  * [Setup]
  * [Documentation]
- * [How to fetching files and directories][1]
+ * [How to fetch files and directories][1]
  * [How to download][2]
  * [How to upload][3]
  * [How to create files and directories][4]
