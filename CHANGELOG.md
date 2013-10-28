@@ -1,5 +1,5 @@
-dev-master
-----------
+1.1.1
+-----
 
  * Voters now extend their base Interfaces
  * Added missing interfaces for `CreatorVoter` and `DeleterVoter`
