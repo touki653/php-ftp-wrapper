@@ -13,7 +13,7 @@
 
 namespace Touki\FTP;
 
-use Touki\FTP\Deleter\FTP as FTPDeleter;
+use Touki\FTP\Deleter as FTPDeleter;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Manager\FTPFilesystemManager;
 

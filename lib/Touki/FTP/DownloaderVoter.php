@@ -13,7 +13,7 @@
 
 namespace Touki\FTP;
 
-use Touki\FTP\Downloader\FTP as FTPDownloader;
+use Touki\FTP\Downloader as FTPDownloader;
 use Touki\FTP\Model\Filesystem;
 
 /**

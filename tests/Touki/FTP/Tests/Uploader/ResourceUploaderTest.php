@@ -11,37 +11,32 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Uploader\FTP;
+namespace Touki\FTP\Tests\Uploader;
 
 use Touki\FTP\Tests\ConnectionAwareTestCase;
-use Touki\FTP\Uploader\FTP\NbResourceUploader;
+use Touki\FTP\Uploader\ResourceUploader;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\FTP;
 
 /**
- * Non Blocking File uploader test
+ * Resource uploader test
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbResourceUploaderTest extends ConnectionAwareTestCase
+class ResourceUploaderTest extends ConnectionAwareTestCase
 {
     public function setUp()
     {
         parent::setUp();
 
-        $self           = $this;
-        $this->called   = false;
-        $this->wrapper  = self::$wrapper;
-        $this->uploader = new NbResourceUploader($this->wrapper);
-        $this->file     = __FILE__;
-        $this->local    = fopen($this->file, 'r');
-        $this->remote   = new File(basename(__FILE__));
-        $this->options  = array(
-            FTP::NON_BLOCKING => true,
-            FTP::NON_BLOCKING_CALLBACK => function() use ($self) {
-                $self->called = true;
-            }
+        $this->wrapper    = self::$wrapper;
+        $this->uploader   = new ResourceUploader($this->wrapper);
+        $this->file       = __FILE__;
+        $this->local      = fopen($this->file, 'r');
+        $this->remote     = new File(basename(__FILE__));
+        $this->options    = array(
+            FTP::NON_BLOCKING => false
         );
     }
 
@@ -59,7 +54,6 @@ class NbResourceUploaderTest extends ConnectionAwareTestCase
     {
         $this->assertTrue($this->uploader->upload($this->remote, $this->local, $this->options));
         $this->assertNotEquals(-1, $this->wrapper->size($this->remote->getRealpath()));
-        $this->assertTrue($this->called, 'Callback has not been called');
 
         $this->wrapper->delete($this->remote->getRealpath());
     }
@@ -88,7 +82,7 @@ class NbResourceUploaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Invalid option given. Expected true as FTP::NON_BLOCKING parameter
+     * @expectedExceptionMessage Invalid option given. Expected false as FTP::NON_BLOCKING parameter
      */
     public function testUploadNoOptionNonBlocking()
     {
@@ -97,12 +91,12 @@ class NbResourceUploaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Invalid option given. Expected true as FTP::NON_BLOCKING parameter
+     * @expectedExceptionMessage Invalid option given. Expected false as FTP::NON_BLOCKING parameter
      */
     public function testUploadWrongOptionNonBlocking()
     {
         $this->uploader->upload($this->remote, $this->local, array(
-            FTP::NON_BLOCKING => false
+            FTP::NON_BLOCKING => true
         ));
     }
 }

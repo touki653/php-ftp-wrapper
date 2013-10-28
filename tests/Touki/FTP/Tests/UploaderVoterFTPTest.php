@@ -56,7 +56,7 @@ class UploaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $uploader = $this->voter->vote($file, $local, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Uploader\FTP\FileUploader', $uploader);
+        $this->assertInstanceOf('Touki\FTP\Uploader\FileUploader', $uploader);
     }
 
     public function testVoteElectResourceUploader()
@@ -68,7 +68,7 @@ class UploaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $uploader = $this->voter->vote($file, $local, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Uploader\FTP\ResourceUploader', $uploader);
+        $this->assertInstanceOf('Touki\FTP\Uploader\ResourceUploader', $uploader);
 
         fclose($local);
     }
@@ -82,7 +82,7 @@ class UploaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $uploader = $this->voter->vote($file, $local, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Uploader\FTP\NbFileUploader', $uploader);
+        $this->assertInstanceOf('Touki\FTP\Uploader\NbFileUploader', $uploader);
     }
 
     public function testVoteElectNbResourceUploader()
@@ -94,7 +94,7 @@ class UploaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $uploader = $this->voter->vote($file, $local, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Uploader\FTP\NbResourceUploader', $uploader);
+        $this->assertInstanceOf('Touki\FTP\Uploader\NbResourceUploader', $uploader);
 
         fclose($local);
     }
@@ -116,7 +116,7 @@ class UploaderVoterFTPTest extends \PHPUnit_Framework_TestCase
 
         $uploader = $this->voter->vote($file, $local, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Uploader\FTP\FileUploader', $uploader);
+        $this->assertInstanceOf('Touki\FTP\Uploader\FileUploader', $uploader);
     }
 
     public function testVotePrependAnotherFileUploader()

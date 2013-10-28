@@ -56,7 +56,7 @@ class DownloaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $downloader = $this->voter->vote($local, $file, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Downloader\FTP\FileDownloader', $downloader);
+        $this->assertInstanceOf('Touki\FTP\Downloader\FileDownloader', $downloader);
     }
 
     public function testVoteElectResourceDownloader()
@@ -68,7 +68,7 @@ class DownloaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $downloader = $this->voter->vote($local, $file, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Downloader\FTP\ResourceDownloader', $downloader);
+        $this->assertInstanceOf('Touki\FTP\Downloader\ResourceDownloader', $downloader);
 
         fclose($local);
     }
@@ -82,7 +82,7 @@ class DownloaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $downloader = $this->voter->vote($local, $file, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Downloader\FTP\NbFileDownloader', $downloader);
+        $this->assertInstanceOf('Touki\FTP\Downloader\NbFileDownloader', $downloader);
     }
 
     public function testVoteElectNbResourceDownloader()
@@ -94,7 +94,7 @@ class DownloaderVoterFTPTest extends \PHPUnit_Framework_TestCase
         );
         $downloader = $this->voter->vote($local, $file, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Downloader\FTP\NbResourceDownloader', $downloader);
+        $this->assertInstanceOf('Touki\FTP\Downloader\NbResourceDownloader', $downloader);
 
         fclose($local);
     }
@@ -116,7 +116,7 @@ class DownloaderVoterFTPTest extends \PHPUnit_Framework_TestCase
 
         $downloader = $this->voter->vote($local, $file, $options);
 
-        $this->assertInstanceOf('Touki\FTP\Downloader\FTP\FileDownloader', $downloader);
+        $this->assertInstanceOf('Touki\FTP\Downloader\FileDownloader', $downloader);
     }
 
     public function testVotePrependAnotherFileDownloader()

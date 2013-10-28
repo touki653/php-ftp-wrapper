@@ -11,7 +11,7 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Downloader\FTP;
+namespace Touki\FTP\Downloader;
 
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;

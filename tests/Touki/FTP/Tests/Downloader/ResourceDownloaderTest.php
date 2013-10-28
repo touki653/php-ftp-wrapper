@@ -11,37 +11,32 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Downloader\FTP;
+namespace Touki\FTP\Tests\Downloader;
 
 use Touki\FTP\Tests\ConnectionAwareTestCase;
-use Touki\FTP\Downloader\FTP\NbResourceDownloader;
+use Touki\FTP\Downloader\ResourceDownloader;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;
 
 /**
- * Non Blocking Resource downloader test
+ * Resource downloader test
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbResourceDownloaderTest extends ConnectionAwareTestCase
+class ResourceDownloaderTest extends ConnectionAwareTestCase
 {
     public function setUp()
     {
         parent::setUp();
 
-        $self             = $this;
-        $this->called     = false;
-        $this->downloader = new NbResourceDownloader(new FTPWrapper(self::$connection));
+        $this->downloader = new ResourceDownloader(new FTPWrapper(self::$connection));
         $this->file       = tempnam(sys_get_temp_dir(), 'resourcedownloader');
         $this->local      = fopen($this->file, 'w+');
         $this->remote     = new File('file1.txt');
         $this->options    = array(
-            FTP::NON_BLOCKING => true,
-            FTP::NON_BLOCKING_CALLBACK => function() use ($self) {
-                $self->called = true;
-            }
+            FTP::NON_BLOCKING => false
         );
     }
 
@@ -60,7 +55,6 @@ class NbResourceDownloaderTest extends ConnectionAwareTestCase
         $this->assertTrue($this->downloader->download($this->local, $this->remote, $this->options));
         $this->assertFileExists($this->file);
         $this->assertEquals(file_get_contents($this->file), 'file1');
-        $this->assertTrue($this->called, 'Callback has not been called');
 
         unlink($this->file);
     }
@@ -89,7 +83,7 @@ class NbResourceDownloaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Invalid option given. Expected true as FTP::NON_BLOCKING parameter
+     * @expectedExceptionMessage Invalid option given. Expected false as FTP::NON_BLOCKING parameter
      */
     public function testDownloadNoOptionNonBlocking()
     {
@@ -98,12 +92,12 @@ class NbResourceDownloaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Invalid option given. Expected true as FTP::NON_BLOCKING parameter
+     * @expectedExceptionMessage Invalid option given. Expected false as FTP::NON_BLOCKING parameter
      */
     public function testDownloadWrongOptionNonBlocking()
     {
         $this->downloader->download($this->local, $this->remote, array(
-            FTP::NON_BLOCKING => false
+            FTP::NON_BLOCKING => true
         ));
     }
 }

@@ -11,7 +11,7 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Deleter\FTP;
+namespace Touki\FTP\Deleter;
 
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;

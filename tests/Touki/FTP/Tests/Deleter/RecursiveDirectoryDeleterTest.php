@@ -13,7 +13,7 @@
 
 namespace Touki\FTP\Tests\Deleter\FTP;
 
-use Touki\FTP\Deleter\FTP\RecursiveDirectoryDeleter;
+use Touki\FTP\Deleter\RecursiveDirectoryDeleter;
 use Touki\FTP\Manager\FTPFilesystemManager;
 use Touki\FTP\FilesystemFactory;
 use Touki\FTP\PermissionsFactory;

@@ -11,20 +11,21 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Uploader\FTP;
+namespace Touki\FTP\Tests\Downloader;
 
 use Touki\FTP\Tests\ConnectionAwareTestCase;
-use Touki\FTP\Uploader\FTP\NbFileUploader;
+use Touki\FTP\Downloader\NbFileDownloader;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\FTP;
+use Touki\FTP\FTPWrapper;
 
 /**
- * Non Blocking File uploader test
+ * Non Blocking File downloader test
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbFileUploaderTest extends ConnectionAwareTestCase
+class NbFileDownloaderTest extends ConnectionAwareTestCase
 {
     public function setUp()
     {
@@ -32,10 +33,9 @@ class NbFileUploaderTest extends ConnectionAwareTestCase
 
         $self             = $this;
         $this->called     = false;
-        $this->wrapper    = self::$wrapper;
-        $this->uploader   = new NbFileUploader($this->wrapper);
-        $this->local      = __FILE__;
-        $this->remote     = new File(basename(__FILE__));
+        $this->downloader = new NbFileDownloader(new FTPWrapper(self::$connection));
+        $this->local      = tempnam(sys_get_temp_dir(), 'nbfiledownloader');
+        $this->remote     = new File('file1.txt');
         $this->options    = array(
             FTP::NON_BLOCKING => true,
             FTP::NON_BLOCKING_CALLBACK => function() use ($self) {
@@ -46,67 +46,68 @@ class NbFileUploaderTest extends ConnectionAwareTestCase
 
     public function testVote()
     {
-        $this->assertTrue($this->uploader->vote($this->remote, $this->local, $this->options));
+        $this->assertTrue($this->downloader->vote($this->local, $this->remote, $this->options));
     }
 
-    public function testUpload()
+    public function testDownload()
     {
-        $this->assertTrue($this->uploader->upload($this->remote, $this->local, $this->options));
-        $this->assertNotEquals(-1, $this->wrapper->size($this->remote->getRealpath()));
+        $this->assertTrue($this->downloader->download($this->local, $this->remote, $this->options));
+        $this->assertFileExists($this->local);
+        $this->assertEquals(file_get_contents($this->local), 'file1');
         $this->assertTrue($this->called, 'Callback has not been called');
 
-        $this->wrapper->delete($this->remote->getRealpath());
+        unlink($this->local);
     }
 
     /**
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage Invalid remote file given, expected instance of File, got Touki\FTP\Model\Directory
      */
-    public function testUploadWrongFilesystemInstance()
+    public function testDownloadWrongFilesystemInstance()
     {
         $remote = new Directory('/');
 
-        $this->uploader->upload($remote, $this->local, $this->options);
+        $this->downloader->download($this->local, $remote, $this->options);
     }
 
     /**
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage Invalid local file given. Expected filename, got resource
      */
-    public function testUploadResourceGiven()
+    public function testDownloadResourceGiven()
     {
-        $local = fopen($this->local, 'r');
+        $local = fopen($this->local, 'w+');
 
-        $this->uploader->upload($this->remote, $local, $this->options);
+        $this->downloader->download($local, $this->remote, $this->options);
     }
 
     /**
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage Invalid local file given. Expected filename, got directory
      */
-    public function testUploadDirectoryGiven()
+    public function testDownloadDirectoryGiven()
     {
         $local = __DIR__;
 
-        $this->uploader->upload($this->remote, $local, $this->options);
+        $this->downloader->download($local, $this->remote, $this->options);
     }
 
     /**
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage Invalid option given. Expected true as FTP::NON_BLOCKING parameter
      */
-    public function testUploadNoOptionNonBlocking()
+    public function testDownloadNoOptionNonBlocking()
     {
-        $this->uploader->upload($this->remote, $this->local);
+        $this->downloader->download($this->local, $this->remote);
     }
 
     /**
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage Invalid option given. Expected true as FTP::NON_BLOCKING parameter
      */
-    public function testUploadWrongOptionNonBlocking()
+    public function testDownloadWrongOptionNonBlocking()
     {
-        $this->uploader->upload($this->remote, $this->local, array(
+        $this->downloader->download($this->local, $this->remote, array(
             FTP::NON_BLOCKING => false
         ));
     }

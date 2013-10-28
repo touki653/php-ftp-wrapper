@@ -11,21 +11,21 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Uploader\FTP;
+namespace Touki\FTP\Downloader;
 
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\UploaderInterface;
-use Touki\FTP\UploaderVotableInterface;
+use Touki\FTP\DownloaderInterface;
+use Touki\FTP\DownloaderVotableInterface;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 
 /**
- * Non blocking FTP File uploader
+ * Non Blocking FTP Resource downloader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbFileUploader implements UploaderInterface, UploaderVotableInterface
+class NbResourceDownloader implements DownloaderInterface, DownloaderVotableInterface
 {
     /**
      * FTP Wrapper
@@ -46,12 +46,11 @@ class NbFileUploader implements UploaderInterface, UploaderVotableInterface
     /**
      * {@inheritDoc}
      */
-    public function vote(Filesystem $remote, $local, array $options = array())
+    public function vote($local, Filesystem $remote, array $options = array())
     {
         return
             ($remote instanceof File)
-            && false === is_resource($local)
-            && false === is_dir($local)
+            && true === is_resource($local)
             && isset($options[ FTP::NON_BLOCKING ])
             && true === $options[ FTP::NON_BLOCKING ]
         ;
@@ -62,7 +61,7 @@ class NbFileUploader implements UploaderInterface, UploaderVotableInterface
      *
      * @throws InvalidArgumentException When argument(s) is(are) incorrect
      */
-    public function upload(Filesystem $remote, $local, array $options = array())
+    public function download($local, Filesystem $remote, array $options = array())
     {
         if (!($remote instanceof File)) {
             throw new \InvalidArgumentException(sprintf(
@@ -71,12 +70,11 @@ class NbFileUploader implements UploaderInterface, UploaderVotableInterface
             ));
         }
 
-        if (false !== is_resource($local)) {
-            throw new \InvalidArgumentException("Invalid local file given. Expected filename, got resource");
-        }
-
-        if (false !== is_dir($local)) {
-            throw new \InvalidArgumentException("Invalid local file given. Expected filename, got directory");
+        if (true !== is_resource($local)) {
+            throw new \InvalidArgumentException(sprintf(
+                "Invalid local file given. Expected resource, got %s",
+                gettype($local)
+            ));
         }
 
         if (!isset($options[ FTP::NON_BLOCKING ]) || true !== $options[ FTP::NON_BLOCKING ]) {
@@ -93,7 +91,7 @@ class NbFileUploader implements UploaderInterface, UploaderVotableInterface
 
         $this->wrapper->pasv(true);
 
-        $state = $this->wrapper->putNb($remote->getRealpath(), $local, $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
+        $state = $this->wrapper->fgetNb($local, $remote->getRealpath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
         call_user_func_array($callback, array());
 
         while ($state == FTPWrapper::MOREDATA) {

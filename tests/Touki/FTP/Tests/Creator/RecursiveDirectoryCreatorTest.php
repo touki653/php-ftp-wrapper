@@ -11,9 +11,9 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Creator\FTP;
+namespace Touki\FTP\Tests\Creator;
 
-use Touki\FTP\Creator\FTP\RecursiveDirectoryCreator;
+use Touki\FTP\Creator\RecursiveDirectoryCreator;
 use Touki\FTP\Manager\FTPFilesystemManager;
 use Touki\FTP\FilesystemFactory;
 use Touki\FTP\PermissionsFactory;

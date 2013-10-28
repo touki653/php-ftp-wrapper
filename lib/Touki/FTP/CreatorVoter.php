@@ -13,7 +13,7 @@
 
 namespace Touki\FTP;
 
-use Touki\FTP\Creator\FTP as FTPCreator;
+use Touki\FTP\Creator as FTPCreator;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Manager\FTPFilesystemManager;
 

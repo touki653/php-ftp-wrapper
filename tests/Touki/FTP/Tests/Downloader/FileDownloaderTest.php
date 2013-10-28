@@ -11,10 +11,10 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Downloader\FTP;
+namespace Touki\FTP\Tests\Downloader;
 
 use Touki\FTP\Tests\ConnectionAwareTestCase;
-use Touki\FTP\Downloader\FTP\FileDownloader;
+use Touki\FTP\Downloader\FileDownloader;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\FTP;

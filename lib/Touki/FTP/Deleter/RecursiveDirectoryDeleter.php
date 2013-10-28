@@ -11,23 +11,22 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Creator\FTP;
+namespace Touki\FTP\Deleter;
 
 use Touki\FTP\FTP;
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\CreatorInterface;
-use Touki\FTP\CreatorVotableInterface;
+use Touki\FTP\DeleterInterface;
+use Touki\FTP\DeleterVotableInterface;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\Manager\FTPFilesystemManager;
-use Touki\FTP\Exception\DirectoryException;
 
 /**
- * Recursive Directory Creator
+ * Recursive Directory Deleter
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class RecursiveDirectoryCreator implements CreatorInterface, CreatorVotableInterface
+class RecursiveDirectoryDeleter implements DeleterInterface, DeleterVotableInterface
 {
     /**
      * FTP Wrapper
@@ -68,7 +67,7 @@ class RecursiveDirectoryCreator implements CreatorInterface, CreatorVotableInter
     /**
      * {@inheritDoc}
      */
-    public function create(Filesystem $remote, array $options = array())
+    public function delete(Filesystem $remote, array $options = array())
     {
         if (!($remote instanceof Directory)) {
             throw new \InvalidArgumentException(sprintf(
@@ -81,18 +80,36 @@ class RecursiveDirectoryCreator implements CreatorInterface, CreatorVotableInter
             throw new \InvalidArgumentException("Invalid option given. Expected true as FTP::RECURSIVE parameter");
         }
 
-        $full  = ltrim($remote->getRealpath(), '/');
-        $parts = explode('/', $full);
-        $path  = '';
+        $this->deleteFiles($remote);
+        $this->deleteDirectories($remote, $options);
 
-        foreach ($parts as $part) {
-            $path = sprintf("%s/%s", $path, $part);
-
-            if (null === $this->manager->findDirectoryByName($path) && !$this->wrapper->mkdir($path)) {
-                throw new DirectoryException(sprintf("Could not create directory %s", $path));
-            }
-        }
+        $this->wrapper->rmdir($remote->getRealpath());
 
         return true;
+    }
+
+    /**
+     * Deletes files in a directory
+     *
+     * @param string $path /remote/path/
+     */
+    private function deleteFiles(Directory $path)
+    {
+        foreach ($this->manager->findFiles($path) as $file) {
+            $this->wrapper->delete($file->getRealpath());
+        }
+    }
+
+    /**
+     * Deletes directories in a directory
+     *
+     * @param Directory $path    /remote/path/
+     * @param array     $options Deleter options
+     */
+    private function deleteDirectories(Directory $path, array $options = array())
+    {
+        foreach ($this->manager->findDirectories($path) as $dir) {
+            $this->delete($dir, $options);
+        }
     }
 }

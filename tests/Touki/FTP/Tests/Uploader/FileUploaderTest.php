@@ -11,38 +11,32 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Uploader\FTP;
+namespace Touki\FTP\Tests\Uploader;
 
 use Touki\FTP\Tests\ConnectionAwareTestCase;
-use Touki\FTP\Uploader\FTP\ResourceUploader;
+use Touki\FTP\Uploader\FileUploader;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\FTP;
 
 /**
- * Resource uploader test
+ * File uploader test
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class ResourceUploaderTest extends ConnectionAwareTestCase
+class FileUploaderTest extends ConnectionAwareTestCase
 {
     public function setUp()
     {
         parent::setUp();
 
         $this->wrapper    = self::$wrapper;
-        $this->uploader   = new ResourceUploader($this->wrapper);
-        $this->file       = __FILE__;
-        $this->local      = fopen($this->file, 'r');
+        $this->uploader   = new FileUploader($this->wrapper);
+        $this->local      = __FILE__;
         $this->remote     = new File(basename(__FILE__));
         $this->options    = array(
             FTP::NON_BLOCKING => false
         );
-    }
-
-    public function tearDown()
-    {
-        fclose($this->local);
     }
 
     public function testVote()
@@ -71,11 +65,22 @@ class ResourceUploaderTest extends ConnectionAwareTestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Invalid local file given. Expected resource, got string
+     * @expectedExceptionMessage Invalid local file given. Expected filename, got resource
      */
-    public function testUploadFileGiven()
+    public function testUploadResourceGiven()
     {
-        $local = $this->file;
+        $local = fopen($this->local, 'r');
+
+        $this->uploader->upload($this->remote, $local, $this->options);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Invalid local file given. Expected filename, got directory
+     */
+    public function testUploadDirectoryGiven()
+    {
+        $local = __DIR__;
 
         $this->uploader->upload($this->remote, $local, $this->options);
     }
