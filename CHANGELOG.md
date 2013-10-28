@@ -1,3 +1,9 @@
+dev-master
+----------
+
+ * Removed Deep FTP Folder for Creators, Deleters, Downloaders and Uploaders
+   > From `Touki\FTP\Downloader\FTP\FileDownloader` to `Touki\FTP\Downloader\FileDownloader`
+
 1.1.1
 -----
 
