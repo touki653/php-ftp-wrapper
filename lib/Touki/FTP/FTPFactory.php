@@ -28,6 +28,7 @@ class FTPFactory
     protected $ulVoter;
     protected $crVoter;
     protected $deVoter;
+    protected $fsFactory;
 
     /**
      * Get Wrapper
@@ -150,6 +151,16 @@ class FTPFactory
     }
 
     /**
+     * Set Filesystem Factory
+     *
+     * @param FilesystemFactoryInterface $fsFactory A FilesystemFactory
+     */
+    public function setFilesystemFactory(FilesystemFactoryInterface $fsFactory)
+    {
+        $this->fsFactory = $fsFactory;
+    }
+
+    /**
      * Creates an FTP instance
      *
      * @return FTP An FTP instance
@@ -165,8 +176,11 @@ class FTPFactory
         }
 
         if (null === $this->manager) {
-            $factory = new FilesystemFactory(new PermissionsFactory);
-            $this->manager = new FTPFilesystemManager($this->wrapper, $factory);
+            if (null === $this->fsFactory) {
+                $this->fsFactory = new FilesystemFactory(new PermissionsFactory);
+            }
+
+            $this->manager = new FTPFilesystemManager($this->wrapper, $this->fsFactory);
         }
 
         if (null === $this->dlVoter) {

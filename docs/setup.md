@@ -1,4 +1,4 @@
-# Setting up connection
+# Setting up the connection
 
 ```php
 <?php
@@ -16,7 +16,7 @@ $connection->open();
 ?>
 ```
 
-# Setting up the helper
+# Setting up with the helper
 
 The easiest way to instanciate the main FTP helper is to use its factory
 
@@ -37,6 +37,28 @@ $dlVoter = $factory->getDownloaderVoter();
 $ulVoter = $factory->getUploaderVoter();
 $clVoter = $factory->getCreatorVoter();
 $dlVoter = $factory->getDeleterVoter();
+
+?>
+```
+
+You can also give your own instances by using `setX()` methods  
+This allows you to easily use your own instances, **WindowsFilesystemFactory** for example, if you're using a Windows server
+
+```php
+<?php
+
+use Touki\FTP\FTPFactory;
+use Touki\FTP\WindowsFilesystemFactory;
+use Acme\Foo\MyDownloaderVoter;
+
+$factory   = new FTPFactory;
+$fsFactory = new WindowsFilesystemFactory;
+$dlVoter   = new MyDownloaderVoter;
+
+$factory->setFilesystemFactory($fsFactory);
+$factory->setDownloaderVoter($dlVoter);
+
+$ftp = $factory->build($connection);
 
 ?>
 ```

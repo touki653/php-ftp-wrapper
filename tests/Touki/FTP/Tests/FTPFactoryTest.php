@@ -141,4 +141,20 @@ class FTPFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Touki\FTP\DownloaderVoter', $this->factory->getDownloaderVoter());
         $this->assertSame($ulVoter, $this->factory->getUploaderVoter());
     }
+
+    public function testFilesystemFactoryGiven()
+    {
+        $fsFactory = new WindowsFilesystemFactory;
+        $this->factory->setFilesystemFactory($fsFactory);
+        $ftp = $this->factory->build($this->connection);
+
+        $this->assertInstanceOf('Touki\FTP\FTP', $ftp);
+        $this->assertInstanceOf('Touki\FTP\FTPWrapper', $this->factory->getWrapper());
+        $this->assertSame($this->connection, $this->factory->getWrapper()->getConnection());
+        $this->assertInstanceOf('Touki\FTP\Manager\FTPFilesystemManager', $this->factory->getManager());
+        $this->assertInstanceOf('Touki\FTP\CreatorVoter', $this->factory->getCreatorVoter());
+        $this->assertInstanceOf('Touki\FTP\DeleterVoter', $this->factory->getDeleterVoter());
+        $this->assertInstanceOf('Touki\FTP\DownloaderVoter', $this->factory->getDownloaderVoter());
+        $this->assertInstanceOf('Touki\FTP\UploaderVoter', $this->factory->getUploaderVoter());
+    }
 }
