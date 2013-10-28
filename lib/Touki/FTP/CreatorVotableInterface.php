@@ -20,7 +20,7 @@ use Touki\FTP\Model\Filesystem;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-interface CreatorVotableInterface
+interface CreatorVotableInterface extends CreatorInterface
 {
     /**
      * Returns true if given informations matches with the creator

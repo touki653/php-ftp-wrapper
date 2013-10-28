@@ -20,7 +20,7 @@ use Touki\FTP\Model\Filesystem;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-interface DeleterVotableInterface
+interface DeleterVotableInterface extends DeleterInterface
 {
     /**
      * Returns true if given informations matches with the deleter

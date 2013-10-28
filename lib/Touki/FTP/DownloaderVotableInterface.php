@@ -20,7 +20,7 @@ use Touki\FTP\Model\Filesystem;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-interface DownloaderVotableInterface
+interface DownloaderVotableInterface extends DownloaderInterface
 {
     /**
      * Returns true if given informations matches with the downloader

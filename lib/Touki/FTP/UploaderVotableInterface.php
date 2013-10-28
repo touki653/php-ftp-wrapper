@@ -20,7 +20,7 @@ use Touki\FTP\Model\Filesystem;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-interface UploaderVotableInterface
+interface UploaderVotableInterface extends UploaderInterface
 {
     /**
      * Returns true if given informations matches with the uploader
