@@ -160,22 +160,34 @@ class FTPFactory
             $connection->open();
         }
 
-        $this->wrapper = new FTPWrapper($connection);
+        if (null === $this->wrapper) {
+            $this->wrapper = new FTPWrapper($connection);
+        }
 
-        $factory = new FilesystemFactory(new PermissionsFactory);
-        $this->manager = new FTPFilesystemManager($this->wrapper, $factory);
+        if (null === $this->manager) {
+            $factory = new FilesystemFactory(new PermissionsFactory);
+            $this->manager = new FTPFilesystemManager($this->wrapper, $factory);
+        }
 
-        $this->dlVoter = new DownloaderVoter;
-        $this->dlVoter->addDefaultFTPDownloaders($this->wrapper);
+        if (null === $this->dlVoter) {
+            $this->dlVoter = new DownloaderVoter;
+            $this->dlVoter->addDefaultFTPDownloaders($this->wrapper);
+        }
 
-        $this->ulVoter = new UploaderVoter;
-        $this->ulVoter->addDefaultFTPUploaders($this->wrapper);
+        if (null === $this->ulVoter) {
+            $this->ulVoter = new UploaderVoter;
+            $this->ulVoter->addDefaultFTPUploaders($this->wrapper);
+        }
 
-        $this->crVoter = new CreatorVoter;
-        $this->crVoter->addDefaultFTPCreators($this->wrapper, $this->manager);
+        if (null === $this->crVoter) {
+            $this->crVoter = new CreatorVoter;
+            $this->crVoter->addDefaultFTPCreators($this->wrapper, $this->manager);
+        }
 
-        $this->deVoter = new DeleterVoter;
-        $this->deVoter->addDefaultFTPDeleters($this->wrapper, $this->manager);
+        if (null === $this->deVoter) {
+            $this->deVoter = new DeleterVoter;
+            $this->deVoter->addDefaultFTPDeleters($this->wrapper, $this->manager);
+        }
 
         return new FTP($this->manager, $this->dlVoter, $this->ulVoter, $this->crVoter, $this->deVoter);
     }

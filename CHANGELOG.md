@@ -3,6 +3,7 @@ dev-master
 
  * Voters now extend their base Interfaces
  * Added missing interfaces for `CreatorVoter` and `DeleterVoter`
+ * FTPFactory now accepts user classes
 
 1.1.0
 -----
