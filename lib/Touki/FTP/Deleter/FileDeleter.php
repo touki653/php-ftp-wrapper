@@ -18,6 +18,7 @@ use Touki\FTP\FTPWrapper;
 use Touki\FTP\DeleterInterface;
 use Touki\FTP\DeleterVotableInterface;
 use Touki\FTP\Model\Filesystem;
+use Touki\FTP\Model\File;
 use Touki\FTP\Manager\FTPFilesystemManager;
 use Touki\FTP\Exception\DirectoryException;
 
