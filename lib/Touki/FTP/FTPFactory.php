@@ -40,6 +40,16 @@ class FTPFactory
     }
 
     /**
+     * Set Wrapper
+     *
+     * @param FTPWrapper $wrapper FTP Wrapper
+     */
+    public function setWrapper(FTPWrapper $wrapper)
+    {
+        $this->wrapper = $wrapper;
+    }
+
+    /**
      * Get Manager
      *
      * @return FTPFilesystemManager A FilesystemManager instance
@@ -47,6 +57,16 @@ class FTPFactory
     public function getManager()
     {
         return $this->manager;
+    }
+
+    /**
+     * Set Manager
+     *
+     * @param FTPFilesystemManager $manager Filesystem Manager
+     */
+    public function setManager(FTPFilesystemManager $manager)
+    {
+        $this->manager = $manager;
     }
 
     /**
@@ -60,6 +80,16 @@ class FTPFactory
     }
 
     /**
+     * Set Downloader Voter
+     *
+     * @param DownloaderVoterInterface $dlVoter A Downloader voter
+     */
+    public function setDownloaderVoter(DownloaderVoterInterface $dlVoter)
+    {
+        $this->dlVoter = $dlVoter;
+    }
+
+    /**
      * Get UploaderVoter
      *
      * @return UploaderVoterInterface An Uploader voter
@@ -67,6 +97,16 @@ class FTPFactory
     public function getUploaderVoter()
     {
         return $this->ulVoter;
+    }
+
+    /**
+     * Set Uploader Voter
+     *
+     * @param UploaderVoterInterface $ulVoter An Uploader voter
+     */
+    public function setUploaderVoter(UploaderVoterInterface $ulVoter)
+    {
+        $this->ulVoter = $ulVoter;
     }
 
     /**
@@ -80,6 +120,16 @@ class FTPFactory
     }
 
     /**
+     * Set Creator Voter
+     *
+     * @param CreatorVoterInterface $crVoter A Creator voter
+     */
+    public function setCreatorVoter(CreatorVoterInterface $crVoter)
+    {
+        $this->crVoter = $crVoter;
+    }
+
+    /**
      * Get DeleterVoter
      *
      * @return DeleterVoter A Deleter Voter
@@ -87,6 +137,16 @@ class FTPFactory
     public function getDeleterVoter()
     {
         return $this->deVoter;
+    }
+
+    /**
+     * Set Deleter Voter
+     *
+     * @param DeleterVoterInterface $deVoter A Deleter voter
+     */
+    public function setDeleterVoter(DeleterVoterInterface $deVoter)
+    {
+        $this->deVoter = $deVoter;
     }
 
     /**

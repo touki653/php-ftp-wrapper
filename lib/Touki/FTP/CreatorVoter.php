@@ -22,7 +22,7 @@ use Touki\FTP\Manager\FTPFilesystemManager;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class CreatorVoter
+class CreatorVoter implements CreatorVoterInterface
 {
     /**
      * An array of votable Creator

@@ -22,7 +22,7 @@ use Touki\FTP\Manager\FTPFilesystemManager;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class DeleterVoter
+class DeleterVoter implements DeleterVoterInterface
 {
     /**
      * An array of votable Deleter

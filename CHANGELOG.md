@@ -1,6 +1,12 @@
 dev-master
 ----------
 
+ * Voters now extend their base Interfaces
+ * Added missing interfaces for `CreatorVoter` and `DeleterVoter`
+
+1.1.0
+-----
+
  * Added `$connection->open()` to docs
  * Added changelog
  * Moved Manager dependency from `FilesystemFactory` to `FilesystemFactoryInterface`
