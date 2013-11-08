@@ -5,6 +5,8 @@ dev-master
 
    > Example: From `Touki\FTP\Downloader\FTP\FileDownloader` to `Touki\FTP\Downloader\FileDownloader`
 
+ * Removed hard call to passive mode when uploading/downloading: Issue [#4](https://github.com/touki653/php-ftp-wrapper/issues/4)
+
 1.1.1
 -----
 
