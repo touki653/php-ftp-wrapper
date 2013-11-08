@@ -88,8 +88,6 @@ class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterf
         );
         $options = $options + $defaults;
 
-        $this->wrapper->pasv(true);
-
         return $this->wrapper->fget($local, $remote->getRealPath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
     }
 }

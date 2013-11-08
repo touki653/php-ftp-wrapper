@@ -91,8 +91,6 @@ class NbFileUploader implements UploaderInterface, UploaderVotableInterface
         $options  = $options + $defaults;
         $callback = $options[ FTP::NON_BLOCKING_CALLBACK ];
 
-        $this->wrapper->pasv(true);
-
         $state = $this->wrapper->putNb($remote->getRealpath(), $local, $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
         call_user_func_array($callback, array());
 
