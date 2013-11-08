@@ -87,8 +87,6 @@ class ResourceUploader implements UploaderInterface, UploaderVotableInterface
         );
         $options = $options + $defaults;
 
-        $this->wrapper->pasv(true);
-
         return $this->wrapper->fput($remote->getRealPath(), $local, $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
     }
 }
