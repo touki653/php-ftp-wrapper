@@ -1,63 +1,61 @@
 <?php
 
-/**
- * This file is a part of the FTP Wrapper package
- *
- * For the full informations, please read the README file
- * distributed with this source code
- *
- * @package FTP Wrapper
- * @version 1.1.0
- * @author  Touki <g.vincendon@vithemis.com>
- */
-
 namespace Touki\FTP\Tests;
 
-use Touki\FTP\Connection\Connection;
 use Touki\FTP\FTPWrapper;
+use Touki\FTP\ConnectionContext;
+use Touki\FTP\Connector\Connector;
+use Touki\FTP\Exception\FTPException;
 
 /**
- * Base class for connection test case.
- * It creates a pseudo cache of the working connection
+ * Base class for tests which need the connection
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
 abstract class ConnectionAwareTestCase extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * Static connection
+     * @var ConnectionInterface
+     */
     protected static $connection;
-    protected static $wrapper;
-    protected static $worked;
 
     /**
-     * Called before class instantiation.
-     * It checks first if a connection is already established.
-     * If not, a new static variable is assigned to the conncetion
+     * Static wrapper
+     * @var FTPWrapper
+     */
+    protected static $wrapper;
+
+    /**
+     * {@inheritDoc}
      */
     public static function setUpBeforeClass()
     {
-        if (null !== self::$worked) {
+        if (null !== self::$connection) {
             return;
         }
 
-        $connection = new Connection(getenv("FTP_HOST"), getenv("FTP_USERNAME"), getenv("FTP_PASSWORD"), getenv("FTP_PORT"));
+        $context = new ConnectionContext;
+        $context->setHost(getenv("FTP_HOST"));
+        $context->setUsername(getenv("FTP_USERNAME"));
+        $context->setPassword(getenv("FTP_PASSWORD"));
+        $context->setPort(getenv("FTP_PORT"));
+
+        $connector = new Connector;
 
         try {
-            $connection->open();
-            self::$connection = $connection;
-            self::$wrapper    = new FTPWrapper($connection);
-            self::$worked     = true;
-        } catch (\Exception $e) {
-            self::$worked = false;
+            self::$connection = $connector->open($context);
+            self::$wrapper    = new FTPWrapper(self::$connection);
+        } catch (FTPException $e) {
         }
     }
 
     /**
-     * Checks if the connection suceeded.
-     * Marks the test skipped if not
+     * {@inheritDoc}
      */
     public function setUp()
     {
-        if (false === self::$worked) {
+        if (null === self::$connection) {
             $this->markTestSkipped("Could not reliably get a working FTP connection.\nPlease check your phpunit parameters");
         }
     }

@@ -2,11 +2,6 @@
 
 namespace Touki\FTP;
 
-use Touki\FTP\ConnectionInterface;
-use Touki\FTP\Exception\ConnectionException;
-use Touki\FTP\Exception\ConnectionEstablishedException;
-use Touki\FTP\Exception\ConnectionUnestablishedException;
-
 /**
  * Standard connection
  *
@@ -53,7 +48,7 @@ class ConnectionContext
      * @param integer $port     Specify the port to connect to
      * @param integer $timeout  Specify the default timeout
      */
-    public function __construct($host, $username = 'anonymous', $password = 'guest', $port = 21, $timeout = 90)
+    public function __construct($host = null, $username = 'anonymous', $password = 'guest', $port = 21, $timeout = 90)
     {
         $this->host     = $host;
         $this->username = $username;

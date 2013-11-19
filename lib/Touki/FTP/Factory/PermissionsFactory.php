@@ -14,6 +14,7 @@
 namespace Touki\FTP\Factory;
 
 use Touki\FTP\Model\Permissions;
+use Touki\FTP\Exception\ParseException;
 
 /**
  * Factory class for Permissions model
@@ -34,7 +35,7 @@ class PermissionsFactory
     public function build($input)
     {
         if (strlen($input) != 3) {
-            throw new \InvalidArgumentException(sprintf("%s is not a valid permission input", $input));
+            throw new ParseException(sprintf("%s is not a valid permission input", $input));
         }
 
         $perms = 0;

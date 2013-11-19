@@ -6,10 +6,13 @@ use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\FilesystemFactoryInterface;
+use Touki\FTP\Exception\ParseException;
 
 /**
  * File factory that parses input like
- *   drwxr-x---   3 vincent  vincent      4096 Jul 12 12:16 public_ftp
+ *   drwxr-x---   3 vincent  vincent      4096 Jul 12 12:16 public_ftp - Directory
+ *   -rwxr-x---   3 user     group        4096 Feb 15 12:16 public_ftp - File
+ *   -rwxr-x---   3 user     group        4096 Feb 15 2010  public_ftp - Old file (year given)
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
@@ -38,6 +41,11 @@ class FilesystemFactory implements FilesystemFactoryInterface
     {
         $prefix     = rtrim($prefix, '/');
         $parts      = preg_split("/\s+/", $input);
+
+        if (count($parts) < 7) {
+            throw new ParseException(sprintf("Could not build a filesystem on given input: %s", $input));
+        }
+
         $type       = $parts[0][0];
         $filesystem = $this->resolveFile($type);
         $permParts  = str_split(substr($parts[0], 1, 9), 3);

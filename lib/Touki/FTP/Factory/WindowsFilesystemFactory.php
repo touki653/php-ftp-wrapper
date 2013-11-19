@@ -4,6 +4,7 @@ namespace Touki\FTP\Factory;
 
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
+use Touki\FTP\Exception\ParseException;
 use Touki\FTP\FilesystemFactoryInterface;
 
 /**
@@ -20,8 +21,13 @@ class WindowsFilesystemFactory implements FilesystemFactoryInterface
      */
     public function build($input, $prefix = '')
     {
-        $prefix    = rtrim($prefix, '/');
-        $parts     = preg_split("/\s+/", $input);
+        $prefix = rtrim($prefix, '/');
+        $parts  = preg_split("/\s+/", $input);
+
+        if (count($parts) < 4) {
+            throw new ParseException(sprintf("Could not build a windows filesystem on given input: %s", $input));
+        }
+
         $inputdate = sprintf("%s %s", $parts[0], $parts[1]);
         $date      = \DateTime::createFromFormat('m-d-y H:iA', $inputdate);
         $name      = implode(' ', array_slice($parts, 3));

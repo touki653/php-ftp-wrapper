@@ -27,10 +27,10 @@ use Touki\FTP\Exception\DirectoryException;
 class FTP implements FTPInterface
 {
     /**
-     * Filesystem manager
-     * @var FTPFilesystemManager
+     * Filesystem fetcher
+     * @var FilesystemFetcher
      */
-    protected $manager;
+    protected $fetcher;
 
     /**
      * FTP Wrapper
@@ -41,22 +41,12 @@ class FTP implements FTPInterface
     /**
      * Constructor
      *
-     * @param FTPFilesystemManager $manager Directory manager
+     * @param FTPFilesystemManager $fetcher Directory manager
      */
-    public function __construct(FTPWrapper $wrapper, FTPFilesystemManager $manager)
+    public function __construct(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
         $this->wrapper = $wrapper;
-        $this->manager = $manager;
-    }
-
-    /**
-     * Get Manager
-     *
-     * @return FTPFilesystemManager Filesystem manager
-     */
-    public function getManager()
-    {
-        return $this->manager;
+        $this->fetcher = $fetcher;
     }
 
     /**
@@ -64,7 +54,7 @@ class FTP implements FTPInterface
      */
     public function findFilesystems(Directory $directory)
     {
-        return $this->manager->findAll($directory);
+        return $this->fetcher->findAll($directory);
     }
 
     /**
@@ -72,7 +62,7 @@ class FTP implements FTPInterface
      */
     public function findFiles(Directory $directory)
     {
-        return $this->manager->findFiles($directory);
+        return $this->fetcher->findFiles($directory);
     }
 
     /**
@@ -80,7 +70,7 @@ class FTP implements FTPInterface
      */
     public function findDirectories(Directory $directory)
     {
-        return $this->manager->findDirectories($directory);
+        return $this->fetcher->findDirectories($directory);
     }
 
     /**
@@ -89,7 +79,7 @@ class FTP implements FTPInterface
     public function filesystemExists(Filesystem $filesystem)
     {
         try {
-            return null !== $this->manager->findFilesystemByFilesystem($filesystem);
+            return null !== $this->fetcher->findFilesystemByFilesystem($filesystem);
         } catch (DirectoryException $e) {
             return false;
         }
@@ -101,7 +91,7 @@ class FTP implements FTPInterface
     public function fileExists(File $file)
     {
         try {
-            return null !== $this->manager->findFileByFile($file);
+            return null !== $this->fetcher->findFileByFile($file);
         } catch (DirectoryException $e) {
             return false;
         }
@@ -113,7 +103,7 @@ class FTP implements FTPInterface
     public function directoryExists(Directory $directory)
     {
         try {
-            return null !== $this->manager->findDirectoryByDirectory($directory);
+            return null !== $this->fetcher->findDirectoryByDirectory($directory);
         } catch (DirectoryException $e) {
             return false;
         }
@@ -124,7 +114,7 @@ class FTP implements FTPInterface
      */
     public function findFilesystemByName($filename, Directory $inDirectory = null)
     {
-        return $this->manager->findFilesystemByName($filename, $inDirectory);
+        return $this->fetcher->findFilesystemByName($filename, $inDirectory);
     }
 
     /**
@@ -132,7 +122,7 @@ class FTP implements FTPInterface
      */
     public function findFileByName($filename, Directory $inDirectory = null)
     {
-        return $this->manager->findFileByName($filename, $inDirectory);
+        return $this->fetcher->findFileByName($filename, $inDirectory);
     }
 
     /**
@@ -140,7 +130,7 @@ class FTP implements FTPInterface
      */
     public function findDirectoryByName($directory, Directory $inDirectory = null)
     {
-        return $this->manager->findDirectoryByName($directory, $inDirectory);
+        return $this->fetcher->findDirectoryByName($directory, $inDirectory);
     }
 
     /**
@@ -148,6 +138,6 @@ class FTP implements FTPInterface
      */
     public function getCwd()
     {
-        return $this->manager->getCwd();
+        return $this->fetcher->getCwd();
     }
 }

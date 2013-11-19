@@ -40,7 +40,7 @@ class Progress
     {
         return $this->maxSize;
     }
-    
+
     /**
      * Set MaxSize
      *
@@ -66,7 +66,7 @@ class Progress
     {
         return $this->currentSize;
     }
-    
+
     /**
      * Set CurrentSize
      *
@@ -75,7 +75,7 @@ class Progress
     public function setCurrentSize($currentSize)
     {
         $this->currentSize = $currentSize;
-    
+
         return $this;
     }
 

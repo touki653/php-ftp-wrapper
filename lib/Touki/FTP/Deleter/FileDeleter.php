@@ -1,86 +1,50 @@
 <?php
 
-/**
- * This file is a part of the FTP Wrapper package
- *
- * For the full informations, please read the README file
- * distributed with this source code
- *
- * @package FTP Wrapper
- * @version 1.1.1
- * @author  Touki <g.vincendon@vithemis.com>
- */
-
 namespace Touki\FTP\Deleter;
 
-use Touki\FTP\FTP;
-use Touki\FTP\FTPWrapper;
-use Touki\FTP\DeleterInterface;
-use Touki\FTP\DeleterVotableInterface;
-use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
-use Touki\FTP\Manager\FTPFilesystemManager;
-use Touki\FTP\Exception\DirectoryException;
+use Touki\FTP\FTPWrapper;
+use Touki\FTP\FilesystemFetcher;
+use Touki\FTP\CommandInterface;
+use Touki\FTP\Exception\CreationException;
 
 /**
- * File Deleter
+ * File deleter
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FileDeleter implements DeleterInterface, DeleterVotableInterface
+class FileDeleter implements CommandInterface
 {
     /**
-     * FTP Wrapper
-     * @var FTPWrapper
+     * File
+     * @var Directory
      */
-    protected $wrapper;
-
-    /**
-     * Filesystem Manager
-     * @var FTPFilesystemManager
-     */
-    protected $manager;
+    protected $directory;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper           $wrapper A FTP Wrapper
-     * @param FTPFilesystemManager $manager A Manager instance
+     * @param Directory $directory Directory to create
      */
-    public function __construct(FTPWrapper $wrapper, FTPFilesystemManager $manager)
+    public function __construct(Directory $directory)
     {
-        $this->wrapper = $wrapper;
-        $this->manager = $manager;
+        $this->directory = $directory;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function vote(Filesystem $remote, array $options = array())
+    public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        return
-            ($remote instanceof File)
-        ;
-    }
+        $parts = explode('/', trim($this->directory->getRealpath(), '/'));
+        $path  = '';
 
-    /**
-     * {@inheritDoc}
-     */
-    public function delete(Filesystem $remote, array $options = array())
-    {
-        if (!($remote instanceof File)) {
-            throw new \InvalidArgumentException(sprintf(
-                "Invalid filesystem given, expected instance of File got %s",
-                get_class($remote)
-            ));
+        foreach ($parts as $part) {
+            $path = sprintf("%s/%s", $path, $part);
+
+            if (null === $fetcher->findDirectoryByName($path) && !$wrapper->mkdir($path)) {
+                throw new CreationException(sprintf("Could not create directory %s", $path));
+            }
         }
-
-        if (null === $this->manager->findFileByFile($remote)) {
-            throw new DirectoryException(sprintf("Could not locate file %s", $remote->getRealpath()));
-        }
-
-        $this->wrapper->delete($remote->getRealpath());
-
-        return true;
     }
 }

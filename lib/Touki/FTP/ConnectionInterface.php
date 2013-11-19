@@ -47,4 +47,18 @@ interface ConnectionInterface
      * @param boolean $connected Whether it is connected
      */
     public function setConnected($connected);
+
+    /**
+     * Get Context
+     *
+     * @return ConnectionContext The context of the connection
+     */
+    public function getContext();
+
+    /**
+     * Set Context
+     *
+     * @param ConnectionContext $context The context of the connection
+     */
+    public function setContext(ConnectionContext $context = null);
 }

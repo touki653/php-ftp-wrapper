@@ -24,23 +24,31 @@ class Connection implements ConnectionInterface
     protected $connected = false;
 
     /**
+     * Connection Context
+     * @var ConnectionContext
+     */
+    protected $context;
+
+    /**
      * {@inheritDoc}
      */
     public function getStream()
     {
-        if (!$this->isConnected()) {
+        if (false === $this->isConnected()) {
             throw new ConnectionUnestablishedException("Cannot get stream context, connection is not established");
         }
 
         return $this->stream;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public function setStream($stream)
     {
         $this->stream = $stream;
+
+        return $this;
     }
 
     /**
@@ -57,5 +65,25 @@ class Connection implements ConnectionInterface
     public function setConnected($connected)
     {
         $this->connected = $connected;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setContext(ConnectionContext $context = null)
+    {
+        $this->context = $context;
+
+        return $this;
     }
 }

@@ -4,7 +4,9 @@ namespace Touki\FTP\Connector;
 
 use Touki\FTP\Connection;
 use Touki\FTP\ConnectionContext;
+use Touki\FTP\ConnectionInterface;
 use Touki\FTP\Exception\ConnectionException;
+use Touki\FTP\Exception\ConnectionEstablishedException;
 use Touki\FTP\Exception\ConnectionUnestablishedException;
 
 /**
@@ -24,6 +26,10 @@ class Connector
      */
     public function open(ConnectionContext $context, ConnectionInterface $connection = null)
     {
+        if (null !== $connection && $connection->isConnected()) {
+            throw new ConnectionEstablishedException("Tried to open an already opened Connection");
+        }
+
         $stream = $this->doConnect($context->getHost(), $context->getPort(), $context->getTimeout());
 
         if (false === $stream) {
@@ -41,6 +47,7 @@ class Connector
         $connection = $connection ?: new Connection;
         $connection->setStream($stream);
         $connection->setConnected(true);
+        $connection->setContext($context);
 
         return $connection;
     }
@@ -52,7 +59,7 @@ class Connector
      */
     public function close(ConnectionInterface $connection)
     {
-        if (!$connection->isConnected()) {
+        if (false === $connection->isConnected()) {
             throw new ConnectionUnestablishedException("Tried to close an unitialized connection");
         }
 
@@ -60,6 +67,7 @@ class Connector
 
         $connection->setStream(null);
         $connection->setConnected(false);
+        $connection->setContext(null);
     }
 
     /**
