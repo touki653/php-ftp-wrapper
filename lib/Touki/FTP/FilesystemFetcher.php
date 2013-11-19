@@ -1,20 +1,7 @@
 <?php
 
-/**
- * This file is a part of the FTP Wrapper package
- *
- * For the full informations, please read the README file
- * distributed with this source code
- *
- * @package FTP Wrapper
- * @version 1.1.1
- * @author  Touki <g.vincendon@vithemis.com>
- */
+namespace Touki\FTP;
 
-namespace Touki\FTP\Manager;
-
-use Touki\FTP\FTPWrapper;
-use Touki\FTP\FilesystemFactoryInterface;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
@@ -25,7 +12,7 @@ use Touki\FTP\Exception\DirectoryException;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FTPFilesystemManager
+class FilesystemFetcher
 {
     /**
      * FTP Wrapper
@@ -188,17 +175,6 @@ class FTPFilesystemManager
     }
 
     /**
-     * Finds a filesystem by a filesystem
-     *
-     * @param  Filesystem $name Filesystem instance
-     * @return Filesystem
-     */
-    public function findFilesystemByFilesystem(Filesystem $fs)
-    {
-        return $this->findFilesystemByName($fs->getRealpath());
-    }
-
-    /**
      * Finds a file matching a given name
      *
      * @param  string $name File path
@@ -220,17 +196,6 @@ class FTPFilesystemManager
     }
 
     /**
-     * Finds a file on a given file instance
-     *
-     * @param  File $file File instance
-     * @return File Fetched file
-     */
-    public function findFileByFile(File $file)
-    {
-        return $this->findFileByName($file->getRealpath());
-    }
-
-    /**
      * Finds a directory on a given name
      *
      * @param  string    $name Directory name
@@ -249,17 +214,6 @@ class FTPFilesystemManager
         return $this->findOneBy($directory, function($item) use ($name) {
             return $name == $item->getRealpath() && ($item instanceof Directory);
         });
-    }
-
-    /**
-     * Finds a directory on a given directory instance
-     *
-     * @param  Directory $dir Directory instance
-     * @return Directory Fetched directory
-     */
-    public function findDirectoryByDirectory(Directory $dir)
-    {
-        return $this->findDirectoryByName($dir->getRealpath());
     }
 
     /**

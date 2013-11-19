@@ -28,9 +28,23 @@ interface ConnectionInterface
     public function getStream();
 
     /**
+     * Sets the stream
+     *
+     * @param resource $stream FTP Connection stream
+     */
+    public function setStream($stream);
+
+    /**
      * Tells wether the connection is established
      *
      * @return boolean TRUE if connected, FALSE if not
      */
     public function isConnected();
+
+    /**
+     * Set connected
+     *
+     * @param boolean $connected Whether it is connected
+     */
+    public function setConnected($connected);
 }

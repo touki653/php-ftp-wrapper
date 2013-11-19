@@ -13,20 +13,13 @@
 
 namespace Touki\FTP\Exception;
 
+use RuntimeException;
+
 /**
  * Exception to throw when the connection is already established
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class ConnectionEstablishedException extends FTPException
+class ConnectionEstablishedException extends RuntimeException implements FTPException
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function __construct($message = "", $code = 0, \Exception $previous = NULL)
-    {
-        $this->message  = $message ?: "Connection is already established";
-        $this->code     = $code;
-        $this->previous = $previous;
-    }
 }

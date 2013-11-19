@@ -13,19 +13,13 @@
 
 namespace Touki\FTP\Exception;
 
+use RuntimeException;
+
 /**
  * Exception to throw when an error occured while downloading
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class DownloadException extends FTPException
+class DownloadException extends RuntimeException implements FTPException
 {
-    /**
-     * Overrides the default to String
-     * @return string
-     */
-    public function __toString()
-    {
-        return sprintf('[Download Error] %s', $this->getMessage());
-    }
 }

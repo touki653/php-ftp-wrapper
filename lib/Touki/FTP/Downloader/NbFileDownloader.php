@@ -13,93 +13,97 @@
 
 namespace Touki\FTP\Downloader;
 
-use Touki\FTP\FTP;
-use Touki\FTP\FTPWrapper;
-use Touki\FTP\DownloaderInterface;
-use Touki\FTP\DownloaderVotableInterface;
-use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
+use Touki\FTP\FTPWrapper;
+use Touki\FTP\FilesystemFetcher;
+use Touki\FTP\CommandInterface;
+use Touki\FTP\Exception\DownloadException;
+use Touki\FTP\Exception\DownloadFailedException;
 
 /**
- * FTP Non blocking File downloader
+ * Non blocking FTP File downloader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbFileDownloader implements DownloaderInterface, DownloaderVotableInterface
+class NbFileDownloader implements CommandInterface
 {
     /**
-     * FTP Wrapper
-     * @var FTPWrapper
+     * Local filename
+     * @var string
      */
-    protected $wrapper;
+    protected $local;
+
+    /**
+     * Remote file
+     * @var File
+     */
+    protected $local;
+
+    /**
+     * Callback
+     * @var callable
+     */
+    protected $callback;
+
+    /**
+     * Transfert mode
+     * @var integer
+     */
+    protected $mode;
+
+    /**
+     * Resume position
+     * @var integer
+     */
+    protected $resumepos;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper $wrapper An FTPWrapper instance
+     * @param string   $local     Local filename
+     * @param File     $file      Remote file
+     * @param callable $callback  Callback
+     * @param integer  $mode      Transfert mode
+     * @param integer  $resumepos Resume position
      */
-    public function __construct(FTPWrapper $wrapper)
+    public function __construct($local, File $file, $callback = null, $mode = FTP_BINARY, $resumepos = 0)
     {
-        $this->wrapper = $wrapper;
-    }
+        $callback = null !== $callback ?: function() {};
 
-    /**
-     * {@inheritDoc}
-     */
-    public function vote($local, Filesystem $remote, array $options = array())
-    {
-        return
-            ($remote instanceof File)
-            && false === is_resource($local)
-            && false === is_dir($local)
-            && isset($options[ FTP::NON_BLOCKING ])
-            && true === $options[ FTP::NON_BLOCKING ]
-        ;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws InvalidArgumentException When argument(s) is(are) incorrect
-     */
-    public function download($local, Filesystem $remote, array $options = array())
-    {
-        if (!($remote instanceof File)) {
+        if (!is_callable($callback)) {
             throw new \InvalidArgumentException(sprintf(
-                "Invalid remote file given, expected instance of File, got %s",
-                get_class($remote)
-            ));
+                "Argument 3 or NbFileDownloader expected to be callable, got %s",
+                gettype($callback)
+            ))
         }
 
-        if (false !== is_resource($local)) {
-            throw new \InvalidArgumentException("Invalid local file given. Expected filename, got resource");
+        $this->local     = $local;
+        $this->callback  = $callback;
+        $this->file      = $file;
+        $this->mode      = $mode;
+        $this->resumepos = $resumepos;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
+    {
+        if (!$fetcher->findFileByName($this->file->getRealpath())) {
+            throw new DownloadException(sprintf("File %s does not exist", $this->file->getRealpath()));
         }
 
-        if (false !== is_dir($local)) {
-            throw new \InvalidArgumentException("Invalid local file given. Expected filename, got directory");
+        $state = $wrapper->getNb($this->local, $this->file->getRealpath(), $this->mode, $this->resumepos);
+        call_user_func_array($this->callback, array($wrapper, $fetcher));
+
+        while (FTPWrapper::MOREDATA === $state) {
+            $state = $wrapper->nbContinue();
+
+            call_user_func_array($callback, array($wrapper, $fetcher));
         }
 
-        if (!isset($options[ FTP::NON_BLOCKING ]) || true !== $options[ FTP::NON_BLOCKING ]) {
-            throw new \InvalidArgumentException("Invalid option given. Expected true as FTP::NON_BLOCKING parameter");
+        if (!FTPWrapper::FINISHED === $state) {
+            throw new DownloadFailedException(sprintf("Failed to download file %s", $this->file->getRealpath()));
         }
-
-        $defaults = array(
-            FTP::NON_BLOCKING_CALLBACK => function() { },
-            FTP::TRANSFER_MODE => FTPWrapper::BINARY,
-            FTP::START_POS     => 0
-        );
-        $options  = $options + $defaults;
-        $callback = $options[ FTP::NON_BLOCKING_CALLBACK ];
-
-        $state = $this->wrapper->getNb($local, $remote->getRealpath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
-        call_user_func_array($callback, array());
-
-        while ($state == FTPWrapper::MOREDATA) {
-            $state = $this->wrapper->nbContinue();
-
-            call_user_func_array($callback, array());
-        }
-
-        return $state === FTPWrapper::FINISHED;
     }
 }

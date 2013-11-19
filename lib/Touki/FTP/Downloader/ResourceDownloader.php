@@ -13,81 +13,78 @@
 
 namespace Touki\FTP\Downloader;
 
-use Touki\FTP\FTP;
-use Touki\FTP\FTPWrapper;
-use Touki\FTP\DownloaderInterface;
-use Touki\FTP\DownloaderVotableInterface;
-use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
+use Touki\FTP\FTPWrapper;
+use Touki\FTP\FilesystemFetcher;
+use Touki\FTP\CommandInterface;
+use Touki\FTP\Exception\DownloadException;
+use Touki\FTP\Exception\DownloadFailedException;
 
 /**
  * FTP Resource downloader
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class ResourceDownloader implements DownloaderInterface, DownloaderVotableInterface
+class ResourceDownloader implements CommandInterface
 {
     /**
-     * FTP Wrapper
-     * @var FTPWrapper
+     * Local resource
+     * @var resource
      */
-    protected $wrapper;
+    protected $local;
+
+    /**
+     * Remote file
+     * @var File
+     */
+    protected $local;
+
+    /**
+     * Transfert mode
+     * @var integer
+     */
+    protected $mode;
+
+    /**
+     * Resume position
+     * @var integer
+     */
+    protected $resumepos;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper $wrapper An FTPWrapper instance
+     * @param resource $local     Local stream
+     * @param File     $file      Remote file
+     * @param integer  $mode      Transfert mode
+     * @param integer  $resumepos Resume position
      */
-    public function __construct(FTPWrapper $wrapper)
+    public function __construct($local, File $file, $mode = FTP_BINARY, $resumepos = 0)
     {
-        $this->wrapper = $wrapper;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function vote($local, Filesystem $remote, array $options = array())
-    {
-        return
-            ($remote instanceof File)
-            && true === is_resource($local)
-            // && false === is_dir($local) If it's a resource, it cannot be a directory, duh.
-            && isset($options[ FTP::NON_BLOCKING ])
-            && false === $options[ FTP::NON_BLOCKING ]
-        ;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws InvalidArgumentException When argument(s) is(are) incorrect
-     */
-    public function download($local, Filesystem $remote, array $options = array())
-    {
-        if (!($remote instanceof File)) {
+        if (!is_resource($local)) {
             throw new \InvalidArgumentException(sprintf(
-                "Invalid remote file given, expected instance of File, got %s",
-                get_class($remote)
-            ));
-        }
-
-        if (true !== is_resource($local)) {
-            throw new \InvalidArgumentException(sprintf(
-                "Invalid local file given. Expected resource, got %s",
+                "Argument 1 for ResourceDownloader expected to be resource, got %s",
                 gettype($local)
             ));
         }
 
-        if (!isset($options[ FTP::NON_BLOCKING ]) || false !== $options[ FTP::NON_BLOCKING ]) {
-            throw new \InvalidArgumentException("Invalid option given. Expected false as FTP::NON_BLOCKING parameter");
+        $this->local = $local;
+        $this->file  = $file;
+        $this->mode  = $mode;
+        $this->resumepos = $resumepos;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
+    {
+        if (!$fetcher->findFileByName($this->file->getRealpath())) {
+            throw new DownloadException(sprintf("File %s does not exist", $this->file->getRealpath()));
         }
 
-        $defaults = array(
-            FTP::TRANSFER_MODE => FTPWrapper::BINARY,
-            FTP::START_POS     => 0
-        );
-        $options = $options + $defaults;
-
-        return $this->wrapper->fget($local, $remote->getRealPath(), $options[ FTP::TRANSFER_MODE ], $options[ FTP::START_POS ]);
+        if (!$wrapper->fget($this->local, $this->file->getRealPath(), $this->mode, $this->resumepos)) {
+            throw new DownloadFailedException(sprintf("Failed to download file %s", $this->file->getRealpath()));
+        }
     }
 }

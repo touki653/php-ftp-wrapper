@@ -26,12 +26,6 @@ use Touki\FTP\Exception\DirectoryException;
  */
 class FTP implements FTPInterface
 {
-    const NON_BLOCKING          = 1;
-    const NON_BLOCKING_CALLBACK = 2;
-    const TRANSFER_MODE         = 3;
-    const START_POS             = 4;
-    const RECURSIVE             = 5;
-
     /**
      * Filesystem manager
      * @var FTPFilesystemManager
@@ -39,46 +33,20 @@ class FTP implements FTPInterface
     protected $manager;
 
     /**
-     * Downloader Voter
-     * @var DownloaderVoterInterface
+     * FTP Wrapper
+     * @var FTPWrapper
      */
-    protected $dlVoter;
-
-    /**
-     * Uploader Voter
-     * @var UploaderVoterInterface
-     */
-    protected $ulVoter;
-
-    /**
-     * Creator Voter
-     * @var CreatorVoter
-     */
-    protected $creatorVoter;
-
-    /**
-     * Deleter Voter
-     * @var DeleterVoter
-     */
-    protected $deleterVoter;
+    protected $wrapper;
 
     /**
      * Constructor
      *
      * @param FTPFilesystemManager $manager Directory manager
      */
-    public function __construct(
-        FTPFilesystemManager $manager,
-        DownloaderVoterInterface $dlVoter,
-        UploaderVoterInterface $ulVoter,
-        CreatorVoter $creatorVoter,
-        DeleterVoter $deleterVoter
-    ) {
-        $this->manager      = $manager;
-        $this->dlVoter      = $dlVoter;
-        $this->ulVoter      = $ulVoter;
-        $this->creatorVoter = $creatorVoter;
-        $this->deleterVoter = $deleterVoter;
+    public function __construct(FTPWrapper $wrapper, FTPFilesystemManager $manager)
+    {
+        $this->wrapper = $wrapper;
+        $this->manager = $manager;
     }
 
     /**
@@ -181,65 +149,5 @@ class FTP implements FTPInterface
     public function getCwd()
     {
         return $this->manager->getCwd();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function download($local, Filesystem $remote, array $options = array())
-    {
-        if (!$this->filesystemExists($remote)) {
-            throw new DirectoryException(sprintf(
-                "Remote filesystem %s of type %s does not exists",
-                $remote->getRealpath(),
-                get_class($remote)
-            ));
-        }
-
-        $options = $options + array(
-            FTP::NON_BLOCKING => false
-        );
-        $downloader = $this->dlVoter->vote($local, $remote, $options);
-
-        return $downloader->download($local, $remote, $options);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function upload(Filesystem $remote, $local, array $options = array())
-    {
-        $options = $options + array(
-            FTP::NON_BLOCKING => false
-        );
-        $uploader = $this->ulVoter->vote($remote, $local, $options);
-
-        return $uploader->upload($remote, $local, $options);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function create(Filesystem $filesystem, array $options = array())
-    {
-        $options = $options + array(
-            FTP::RECURSIVE => true
-        );
-        $creator = $this->creatorVoter->vote($filesystem, $options);
-
-        return $creator->create($filesystem, $options);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function delete(Filesystem $filesystem, array $options = array())
-    {
-        $options = $options + array(
-            FTP::RECURSIVE => true
-        );
-        $deleter = $this->deleterVoter->vote($filesystem, $options);
-
-        return $deleter->delete($filesystem, $options);
     }
 }

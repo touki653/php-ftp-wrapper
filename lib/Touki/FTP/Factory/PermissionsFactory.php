@@ -11,7 +11,7 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP;
+namespace Touki\FTP\Factory;
 
 use Touki\FTP\Model\Permissions;
 

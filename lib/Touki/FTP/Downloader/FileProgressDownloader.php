@@ -1,19 +1,9 @@
 <?php
 
-/**
- * This file is a part of the FTP Wrapper package
- *
- * For the full informations, please read the README file
- * distributed with this source code
- *
- * @package FTP Wrapper
- * @version 1.1.1
- * @author  Touki <g.vincendon@vithemis.com>
- */
-
 namespace Touki\FTP\Downloader;
 
 use Touki\FTP\Model\File;
+use Touki\FTP\Model\Progress;
 use Touki\FTP\FTPWrapper;
 use Touki\FTP\FilesystemFetcher;
 use Touki\FTP\CommandInterface;
@@ -21,11 +11,12 @@ use Touki\FTP\Exception\DownloadException;
 use Touki\FTP\Exception\DownloadFailedException;
 
 /**
- * Non blocking FTP Resource downloader
+ * File Progress downloader
+ * Creates a Progress instance which is passed as a first argument of the callback
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class NbResourceDownloader implements CommandInterface
+class FileProgressDownloader implements CommandInterface
 {
     /**
      * Local filename
@@ -68,14 +59,7 @@ class NbResourceDownloader implements CommandInterface
      */
     public function __construct($local, File $file, $callback = null, $mode = FTP_BINARY, $resumepos = 0)
     {
-        $callback = $callback ?: function() {};
-
-        if (!is_resource($local)) {
-            throw new \InvalidArgumentException(sprintf(
-                "Argument 1 for ResourceDownloader expected to be resource, got %s",
-                gettype($local)
-            ));
-        }
+        $callback = null !== $callback ?: function() {};
 
         if (!is_callable($callback)) {
             throw new \InvalidArgumentException(sprintf(
@@ -84,8 +68,8 @@ class NbResourceDownloader implements CommandInterface
             ))
         }
 
-        $this->local     = $local;
         $this->callback  = $callback;
+        $this->local     = $local;
         $this->file      = $file;
         $this->mode      = $mode;
         $this->resumepos = $resumepos;
@@ -100,13 +84,21 @@ class NbResourceDownloader implements CommandInterface
             throw new DownloadException(sprintf("File %s does not exist", $this->file->getRealpath()));
         }
 
-        $state = $wrapper->fgetNb($this->local, $this->file->getRealpath(), $this->mode, $this->resumepos);
-        call_user_func_array($this->callback, array($wrapper, $fetcher));
+        $local = fopen($this->local, 'a+');
+        fseek($local, $this->resumepos);
+
+        $progress = new Progress($wrapper->size($this->file->getRealpath()));
+        $progress->setCurrentSize(ftell($local));
+
+        $state = $wrapper->fgetNb($local, $this->file->getRealpath(), $this->mode, $this->resumepos);
+        $progress->setCurrentSize(ftell($local));
+        call_user_func_array($this->callback, array($progress, $wrapper, $fetcher));
 
         while (FTPWrapper::MOREDATA === $state) {
             $state = $wrapper->nbContinue();
+            $progress->setCurrentSize(ftell($local));
 
-            call_user_func_array($callback, array($wrapper, $fetcher));
+            call_user_func_array($callback, array($progress, $wrapper, $fetcher));
         }
 
         if (!FTPWrapper::FINISHED === $state) {
