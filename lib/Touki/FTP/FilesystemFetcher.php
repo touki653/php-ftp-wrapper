@@ -6,6 +6,7 @@ use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
 use Touki\FTP\Exception\DirectoryException;
+use Touki\FTP\Exception\NoResultException;
 
 /**
  * FTP Filesystem Manager to fetch various informations on the distant FTP
@@ -66,10 +67,10 @@ class FilesystemFetcher
         }
 
         foreach ($raw as $item) {
-            $fs = $this->factory->build($item, $directory);
+            $filesystem = $this->factory->build($item, $directory);
 
-            if (true === call_user_func_array($callable, array($fs))) {
-                $list[] = $fs;
+            if (true === call_user_func_array($callable, array($filesystem))) {
+                $list[] = $filesystem;
             }
         }
 
@@ -142,14 +143,14 @@ class FilesystemFetcher
         }
 
         foreach ($raw as $item) {
-            $fs = $this->factory->build($item, $directory);
+            $filesystem = $this->factory->build($item, $directory);
 
-            if (true === call_user_func_array($callable, array($fs))) {
-                return $fs;
+            if (true === call_user_func_array($callable, array($filesystem))) {
+                return $filesystem;
             }
         }
 
-        return null;
+        throw new NoResultException("No result were found");
     }
 
     /**
@@ -165,13 +166,17 @@ class FilesystemFetcher
         $directory = dirname($name);
 
         if ($inDirectory) {
-            $name      = $inDirectory->getRealpath().$name;
+            $name      = '/'.ltrim($inDirectory->getRealpath().$name, '/');
             $directory = $inDirectory;
         }
 
-        return $this->findOneBy($directory, function ($item) use ($name) {
-            return $name == $item->getRealpath();
-        });
+        try {
+            return $this->findOneBy($directory, function ($item) use ($name) {
+                return $name == $item->getRealpath();
+            });
+        } catch (NoResultException $e) {
+            throw new NoResultException(sprintf("Filesystem %s not found", $name), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -186,13 +191,17 @@ class FilesystemFetcher
         $directory = dirname($name);
 
         if ($inDirectory) {
-            $name      = $inDirectory->getRealpath().$name;
+            $name      = '/'.ltrim($inDirectory->getRealpath().$name, '/');
             $directory = $inDirectory;
         }
 
-        return $this->findOneBy($directory, function($item) use ($name) {
-            return $name == $item->getRealpath() && ($item instanceof File);
-        });
+        try {
+            return $this->findOneBy($directory, function($item) use ($name) {
+                return $name == $item->getRealpath() && ($item instanceof File);
+            });
+        } catch (NoResultException $e) {
+            throw new NoResultException(sprintf("File %s not found", $name), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -207,13 +216,17 @@ class FilesystemFetcher
         $directory = dirname($name);
 
         if ($inDirectory) {
-            $name      = $inDirectory->getRealpath().$name;
+            $name      = '/'.ltrim($inDirectory->getRealpath().$name, '/');
             $directory = $inDirectory;
         }
 
-        return $this->findOneBy($directory, function($item) use ($name) {
-            return $name == $item->getRealpath() && ($item instanceof Directory);
-        });
+        try {
+            return $this->findOneBy($directory, function($item) use ($name) {
+                return $name == $item->getRealpath() && ($item instanceof Directory);
+            });
+        } catch (NoResultException $e) {
+            throw new NoResultException(sprintf("Directory %s not found", $name), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -224,6 +237,10 @@ class FilesystemFetcher
     public function getCwd()
     {
         $path = $this->wrapper->pwd();
+
+        if ('/' === $path) {
+            return new Directory('/');
+        }
 
         return $this->findDirectoryByName($path);
     }
