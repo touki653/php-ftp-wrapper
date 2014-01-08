@@ -4,6 +4,7 @@ namespace Touki\FTP\Tests\Creator;
 
 use Touki\FTP\Creator\RecursiveDirectoryCreator;
 use Touki\FTP\Model\Directory;
+use Touki\FTP\Exception\NoResultException;
 
 /**
  * Recursive directory creator test
@@ -55,7 +56,7 @@ class RecursiveDirectoryCreatorTest extends \PHPUnit_Framework_TestCase
         $fetcher
             ->expects($this->once())
             ->method('findDirectoryByName')
-            ->will($this->returnValue(null))
+            ->will($this->throwException(new NoResultException))
         ;
 
         $creator = new RecursiveDirectoryCreator(new Directory);
@@ -79,45 +80,10 @@ class RecursiveDirectoryCreatorTest extends \PHPUnit_Framework_TestCase
         $fetcher
             ->expects($this->exactly(3))
             ->method('findDirectoryByName')
-            ->will($this->returnValue(null))
+            ->will($this->throwException(new NoResultException))
         ;
 
         $creator = new RecursiveDirectoryCreator(new Directory('/one/deep/folder'));
-
-        $creator->execute($wrapper, $fetcher);
-    }
-
-    /**
-     * @expectedException        Touki\FTP\Exception\CreationException
-     * @expectedExceptionMessage Could not create directory /one/deep/folder
-     */
-    public function testProcessOnDeeperFolderWillExecuteForeachWithDifferentBehaviours()
-    {
-        $wrapper = $this->getMockBuilder('Touki\FTP\FTPWrapper')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $wrapper
-            ->expects($this->exactly(2)) // First one is not called since directory is found
-            ->method('mkdir')
-            ->will($this->onConsecutiveCalls(
-                true, // Creation ok
-                false // Creation failed -> exception
-            ))
-        ;
-        $fetcher = $this->getMockBuilder('Touki\FTP\FilesystemFetcher')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $fetcher
-            ->expects($this->exactly(3))
-            ->method('findDirectoryByName')
-            ->will($this->onConsecutiveCalls(
-                new Directory('/one'), // Found
-                null, // Not Found
-                null  // Not Found
-            ))
-        ;
-
-        $creator = new RecursiveDirectoryCreator(new Directory('/one/deep/folder/subfolder'));
 
         $creator->execute($wrapper, $fetcher);
     }

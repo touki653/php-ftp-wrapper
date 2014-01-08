@@ -23,7 +23,7 @@ class FilesystemFetcher
 
     /**
      * File factory
-     * @var FilesystemFactory
+     * @var FilesystemFactoryInterface
      */
     protected $factory;
 

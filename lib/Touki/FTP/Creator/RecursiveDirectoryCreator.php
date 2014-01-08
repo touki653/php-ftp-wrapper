@@ -7,6 +7,7 @@ use Touki\FTP\FTPWrapper;
 use Touki\FTP\FilesystemFetcher;
 use Touki\FTP\CommandInterface;
 use Touki\FTP\Exception\CreationException;
+use Touki\FTP\Exception\NoResultException;
 
 /**
  * Recursive directory creator
@@ -42,8 +43,12 @@ class RecursiveDirectoryCreator implements CommandInterface
         foreach ($parts as $part) {
             $path = sprintf("%s/%s", $path, $part);
 
-            if (null === $fetcher->findDirectoryByName($path) && !$wrapper->mkdir($path)) {
-                throw new CreationException(sprintf("Could not create directory %s", $path));
+            try {
+                $fetcher->findDirectoryByName($path);
+            } catch (NoResultException $e) {
+                if (!$wrapper->mkdir($path)) {
+                    throw new CreationException(sprintf("Could not create directory %s", $path));
+                }
             }
         }
     }
