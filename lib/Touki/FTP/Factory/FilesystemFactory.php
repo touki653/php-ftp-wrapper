@@ -39,8 +39,8 @@ class FilesystemFactory implements FilesystemFactoryInterface
      */
     public function build($input, $prefix = '')
     {
-        $prefix     = rtrim($prefix, '/');
-        $parts      = preg_split("/\s+/", $input);
+        $prefix = rtrim($prefix, '/');
+        $parts  = preg_split("/\s+/", $input);
 
         if (count($parts) < 7) {
             throw new ParseException(sprintf("Could not build a filesystem on given input: %s", $input));
@@ -51,12 +51,11 @@ class FilesystemFactory implements FilesystemFactoryInterface
         $permParts  = str_split(substr($parts[0], 1, 9), 3);
         $hours      = sscanf($parts[7], "%d:%d");
         $name       = implode(' ', array_slice($parts, 8));
+        $year       = date('Y');
 
         if (null === $hours[1]) {
             $year  = $hours[0];
             $hours = array('00', '00');
-        } else {
-            $year = date('Y');
         }
 
         $date = new \DateTime(sprintf("%s-%s-%s %s:%s", $year, $parts[5], $parts[6], $hours[0], $hours[1]));

@@ -17,18 +17,18 @@ class FileDeleter implements CommandInterface
 {
     /**
      * File
-     * @var Directory
+     * @var File
      */
-    protected $directory;
+    protected $file;
 
     /**
      * Constructor
      *
-     * @param Directory $directory Directory to create
+     * @param File $file File to delete
      */
-    public function __construct(Directory $directory)
+    public function __construct(File $file)
     {
-        $this->directory = $directory;
+        $this->file = $file;
     }
 
     /**
@@ -36,15 +36,10 @@ class FileDeleter implements CommandInterface
      */
     public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        $parts = explode('/', trim($this->directory->getRealpath(), '/'));
-        $path  = '';
-
-        foreach ($parts as $part) {
-            $path = sprintf("%s/%s", $path, $part);
-
-            if (null === $fetcher->findDirectoryByName($path) && !$wrapper->mkdir($path)) {
-                throw new CreationException(sprintf("Could not create directory %s", $path));
-            }
+        if (null === $fetcher->findFileByName($this->file->getRealpath())) {
+            return;
         }
+
+        
     }
 }

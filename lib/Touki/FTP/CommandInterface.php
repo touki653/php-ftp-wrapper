@@ -12,10 +12,10 @@ interface CommandInterface
     /**
      * Executes a given command
      *
-     * @param FTPWrapper           $wrapper Wrapper
-     * @param FTPFilesystemManager $manager Manager
+     * @param FTPWrapper        $wrapper Wrapper
+     * @param FilesystemFetcher $manager Manager
      *
      * @return mixed Command return
      */
-    public function execute(FTPWrapper $wrapper, FTPFilesystemManager $manager);
+    public function execute(FTPWrapper $wrapper, FilesystemFetcher $manager);
 }
