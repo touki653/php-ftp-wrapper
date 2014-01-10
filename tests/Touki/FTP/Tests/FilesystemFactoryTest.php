@@ -21,7 +21,7 @@ use Touki\FTP\PermissionsFactory;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FileFactoryTest extends \PHPUnit_Framework_TestCase
+class FilesystemFactoryTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
@@ -38,7 +38,7 @@ class FileFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($dir->getOwner(), 'guillaume');
         $this->assertEquals($dir->getGroup(), 'guillaume');
         $this->assertEquals($dir->getSize(), 4096);
-        $this->assertEquals($dir->getMtime(), new \DateTime("2013-01-26 16:28:00"));
+        $this->assertEquals($dir->getMtime(), new \DateTime(sprintf("%s-01-26 16:28:00", date('Y'))));
     }
 
     public function testBuildFile()
@@ -51,7 +51,7 @@ class FileFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($file->getOwner(), 'guillaume');
         $this->assertEquals($file->getGroup(), 'www-data');
         $this->assertEquals($file->getSize(), 1035);
-        $this->assertEquals($file->getMtime(), new \DateTime("2013-07-16 17:58:00"));
+        $this->assertEquals($file->getMtime(), new \DateTime(sprintf("%s-07-16 17:58:00", date('Y'))));
     }
 
     public function testBuildFileWithSpace()
@@ -64,6 +64,6 @@ class FileFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($file->getOwner(), 'guillaume');
         $this->assertEquals($file->getGroup(), 'www-data');
         $this->assertEquals($file->getSize(), 1035);
-        $this->assertEquals($file->getMtime(), new \DateTime("2013-07-16 17:58:00"));
+        $this->assertEquals($file->getMtime(), new \DateTime(sprintf("%s-07-16 17:58:00", date('Y'))));
     }
 }
