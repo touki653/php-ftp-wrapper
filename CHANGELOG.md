@@ -1,11 +1,12 @@
-dev-master
-----------
+1.1.2
+-----
 
  * Removed Deep FTP Folder for Creators, Deleters, Downloaders and Uploaders
 
    > Example: From `Touki\FTP\Downloader\FTP\FileDownloader` to `Touki\FTP\Downloader\FileDownloader`
 
  * Removed hard call to passive mode when uploading/downloading: Issue [#4](https://github.com/touki653/php-ftp-wrapper/issues/4)
+ * Fixed bug in `FileDeleter`
 
 1.1.1
 -----
