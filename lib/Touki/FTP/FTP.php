@@ -18,6 +18,7 @@ use Touki\FTP\Model\Directory;
 use Touki\FTP\Model\File;
 use Touki\FTP\Manager\FTPFilesystemManager;
 use Touki\FTP\Exception\DirectoryException;
+use Touki\FTP\Exception\NoResultException;
 
 /**
  * FTP Class which implements standard behaviours of FTP
@@ -39,14 +40,31 @@ class FTP implements FTPInterface
     protected $wrapper;
 
     /**
+     * Commander
+     * @var Commander
+     */
+    protected $commander;
+
+    /**
+     * Helper Collection
+     * @var HelperCollection
+     */
+    protected $helpers;
+
+    /**
      * Constructor
      *
-     * @param FTPFilesystemManager $fetcher Directory manager
+     * @param FTPWrapper        $wrapper   FTP Wrapper
+     * @param FilesystemFetcher $fetcher   Directory fetcher
+     * @param Commander         $commander Command sender
+     * @param HelperCollection  $helpers   Helper collection
      */
-    public function __construct(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
+    public function __construct(FTPWrapper $wrapper, FilesystemFetcher $fetcher, Commander $commander, HelperCollection $helpers)
     {
-        $this->wrapper = $wrapper;
-        $this->fetcher = $fetcher;
+        $this->wrapper   = $wrapper;
+        $this->fetcher   = $fetcher;
+        $this->commander = $commander;
+        $this->helpers   = $helpers;
     }
 
     /**
@@ -82,6 +100,8 @@ class FTP implements FTPInterface
             return null !== $this->fetcher->findFilesystemByFilesystem($filesystem);
         } catch (DirectoryException $e) {
             return false;
+        } catch (NoResultException $e) {
+            return false;
         }
     }
 
@@ -94,6 +114,8 @@ class FTP implements FTPInterface
             return null !== $this->fetcher->findFileByFile($file);
         } catch (DirectoryException $e) {
             return false;
+        } catch (NoResultException $e) {
+            return false;
         }
     }
 
@@ -105,6 +127,8 @@ class FTP implements FTPInterface
         try {
             return null !== $this->fetcher->findDirectoryByDirectory($directory);
         } catch (DirectoryException $e) {
+            return false;
+        } catch (NoResultException $e) {
             return false;
         }
     }
@@ -139,5 +163,46 @@ class FTP implements FTPInterface
     public function getCwd()
     {
         return $this->fetcher->getCwd();
+    }
+
+    /**
+     * Executes a command
+     *
+     * @param CommandInterface $command A command
+     *
+     * @return mixed Command result
+     */
+    public function execute(CommandInterface $command)
+    {
+        return $this->commander->execute($command);
+    }
+
+    /**
+     * Get helper
+     *
+     * @param string $name Helper name
+     *
+     * @return mixed Helper
+     */
+    public function getHelper($name)
+    {
+        if (null === $helper = $this->helpers->get($name)) {
+            throw new \InvalidArgumentException(sprintf(
+                "Helper %s does not exist",
+                $name
+            ));
+        }
+
+        return $helper;
+    }
+
+    /**
+     * Create helper
+     *
+     * @return mixed
+     */
+    public function create()
+    {
+        return $this->getHelper('create');
     }
 }
