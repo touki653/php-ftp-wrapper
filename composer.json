@@ -1,6 +1,6 @@
 {
     "name": "touki/ftp",
-    "description": "A fully object oriented library for PHP (S)FTP functions",
+    "description": "A fully object oriented library for PHP FTP functions",
     "license": "MIT",
     "authors": [
         {
