@@ -176,6 +176,10 @@ class FTPFilesystemManager
     {
         $name = '/'.ltrim($name, '/');
         $directory = dirname($name);
+        
+        // On a Windows server dirname will return a '\' in case of a Windows server.
+        // So replacing the backslashes with slashes to avoid bugs.
+        $directory = str_replace('\\', '/', $directory);
 
         if ($inDirectory) {
             $name      = $inDirectory->getRealpath().$name;
@@ -208,6 +212,10 @@ class FTPFilesystemManager
     {
         $name      = '/'.ltrim($name, '/');
         $directory = dirname($name);
+        
+        // On a Windows server dirname will return a '\' in case of a Windows server.
+        // So replacing the backslashes with slashes to avoid bugs.
+        $directory = str_replace('\\', '/', $directory);        
 
         if ($inDirectory) {
             $name      = $inDirectory->getRealpath().$name;
@@ -240,7 +248,11 @@ class FTPFilesystemManager
     {
         $name      = '/'.ltrim($name, '/');
         $directory = dirname($name);
-
+        
+        // On a Windows server dirname will return a '\' in case of a Windows server.
+        // So replacing the backslashes with slashes to avoid bugs.
+        $directory = str_replace('\\', '/', $directory);
+                        
         if ($inDirectory) {
             $name      = $inDirectory->getRealpath().$name;
             $directory = $inDirectory;
