@@ -183,6 +183,10 @@ class FTPFilesystemManager
         }
 
         return $this->findOneBy($directory, function ($item) use ($name) {
+            if (preg_match('/^(' . preg_quote($name, '/') . ')[\s]+.*/', $item->getRealPath(), $matches)) {
+                $item->setRealPath($matches[1]);
+            }
+
             return $name == $item->getRealpath();
         });
     }
@@ -215,6 +219,10 @@ class FTPFilesystemManager
         }
 
         return $this->findOneBy($directory, function($item) use ($name) {
+            if (preg_match('/^(' . preg_quote($name, '/') . ')[\s]+.*/', $item->getRealPath(), $matches)) {
+                $item->setRealPath($matches[1]);
+            }
+
             return $name == $item->getRealpath() && ($item instanceof File);
         });
     }
@@ -247,6 +255,10 @@ class FTPFilesystemManager
         }
 
         return $this->findOneBy($directory, function($item) use ($name) {
+            if (preg_match('/^(' . preg_quote($name, '/') . ')[\s]+.*/', $item->getRealPath(), $matches)) {
+                $item->setRealPath($matches[1]);
+            }
+
             return $name == $item->getRealpath() && ($item instanceof Directory);
         });
     }
