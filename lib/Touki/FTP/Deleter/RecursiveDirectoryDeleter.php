@@ -1,115 +1,90 @@
 <?php
 
-/**
- * This file is a part of the FTP Wrapper package
- *
- * For the full informations, please read the README file
- * distributed with this source code
- *
- * @package FTP Wrapper
- * @version 1.1.1
- * @author  Touki <g.vincendon@vithemis.com>
- */
-
 namespace Touki\FTP\Deleter;
 
-use Touki\FTP\FTP;
+use Touki\FTP\FilesystemFetcher;
+use Touki\FTP\CommandInterface;
 use Touki\FTP\FTPWrapper;
-use Touki\FTP\DeleterInterface;
-use Touki\FTP\DeleterVotableInterface;
-use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\Directory;
-use Touki\FTP\Manager\FTPFilesystemManager;
+use Touki\FTP\Exception\DeletionException;
 
 /**
  * Recursive Directory Deleter
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class RecursiveDirectoryDeleter implements DeleterInterface, DeleterVotableInterface
+class RecursiveDirectoryDeleter implements CommandInterface
 {
     /**
-     * FTP Wrapper
-     * @var FTPWrapper
+     * Directory to delete
+     * @var Directory
      */
-    protected $wrapper;
-
-    /**
-     * Filesystem Manager
-     * @var FTPFilesystemManager
-     */
-    protected $manager;
+    protected $directory;
 
     /**
      * Constructor
      *
-     * @param FTPWrapper           $wrapper A FTP Wrapper
-     * @param FTPFilesystemManager $manager A Manager instance
+     * @param Directory $directory Directory to delete
      */
-    public function __construct(FTPWrapper $wrapper, FTPFilesystemManager $manager)
+    public function __construct(Directory $directory)
     {
-        $this->wrapper = $wrapper;
-        $this->manager = $manager;
+        $this->directory = $directory;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function vote(Filesystem $remote, array $options = array())
+    public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        return
-            ($remote instanceof Directory)
-            && isset($options[FTP::RECURSIVE])
-            && $options[FTP::RECURSIVE] === true
-        ;
+        if (false === $this->delete($this->directory, $wrapper, $fetcher)) {
+            throw new DeletionException(sprintf("Couldn't delete directory %s", $this->directory->getRealpath()));
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * Processes the deletion
+     *
+     * @param Directory         $directory Directory to delete
+     * @param FTPWrapper        $wrapper   FTP Wrapper
+     * @param FilesystemFetcher $fetcher   Filesystem fetcher
      */
-    public function delete(Filesystem $remote, array $options = array())
+    private function delete(Directory $directory, FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        if (!($remote instanceof Directory)) {
-            throw new \InvalidArgumentException(sprintf(
-                "Invalid filesystem given, expected instance of Directory got %s",
-                get_class($remote)
-            ));
-        }
+        $this->deleteFiles($directory, $wrapper, $fetcher);
+        $this->deleteDirectories($directory, $wrapper, $fetcher);
 
-        if (!isset($options[FTP::RECURSIVE]) || true !== $options[FTP::RECURSIVE]) {
-            throw new \InvalidArgumentException("Invalid option given. Expected true as FTP::RECURSIVE parameter");
-        }
-
-        $this->deleteFiles($remote);
-        $this->deleteDirectories($remote, $options);
-
-        $this->wrapper->rmdir($remote->getRealpath());
-
-        return true;
+        return !!$wrapper->rmdir($directory->getRealpath());
     }
 
     /**
      * Deletes files in a directory
      *
-     * @param string $path /remote/path/
+     * @param Directory         $directory Directory to delete
+     * @param FTPWrapper        $wrapper   FTP Wrapper
+     * @param FilesystemFetcher $fetcher   Filesystem fetcher
      */
-    private function deleteFiles(Directory $path)
+    private function deleteFiles(Directory $directory, FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        foreach ($this->manager->findFiles($path) as $file) {
-            $this->wrapper->delete($file->getRealpath());
+        foreach ($fetcher->findFiles($directory) as $file) {
+            if (false === $wrapper->delete($file->getRealpath())) {
+                throw new DeletionException(sprintf("Couldn't delete file %s", $file->getRealpath()));
+            }
         }
     }
 
     /**
      * Deletes directories in a directory
      *
-     * @param Directory $path    /remote/path/
-     * @param array     $options Deleter options
+     * @param Directory         $directory Directory to delete
+     * @param FTPWrapper        $wrapper   FTP Wrapper
+     * @param FilesystemFetcher $fetcher   Filesystem fetcher
      */
-    private function deleteDirectories(Directory $path, array $options = array())
+    private function deleteDirectories(Directory $directory, FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        foreach ($this->manager->findDirectories($path) as $dir) {
-            $this->delete($dir, $options);
+        foreach ($fetcher->findDirectories($directory) as $dir) {
+            if (false === $this->delete($dir, $wrapper, $fetcher)) {
+                throw new DeletionException(sprintf("Couldn't delete directory %s", $dir->getRealpath()));
+            }
         }
     }
 }

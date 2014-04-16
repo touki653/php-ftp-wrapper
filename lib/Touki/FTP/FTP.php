@@ -25,7 +25,7 @@ use Touki\FTP\Exception\NoResultException;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class FTP implements FTPInterface
+class FTP
 {
     /**
      * Filesystem fetcher

@@ -5,6 +5,7 @@ namespace Touki\FTP\Factory;
 use Touki\FTP\Model\Filesystem;
 use Touki\FTP\Model\File;
 use Touki\FTP\Model\Directory;
+use Touki\FTP\Model\Symlink;
 use Touki\FTP\FilesystemFactoryInterface;
 use Touki\FTP\Exception\ParseException;
 
@@ -58,6 +59,32 @@ class FilesystemFactory implements FilesystemFactoryInterface
             $hours = array('00', '00');
         }
 
+        if ($filesystem instanceof Symlink) {
+            $exp  = explode(' -> ', $name);
+            $name = $exp[0];
+
+            $target = $exp[1];
+
+            // Resolve target path
+            $join = array();
+
+            foreach (explode('/', $target) as $component) {
+                if (!$component || '.' == $component) {
+                    continue;
+                }
+
+                if ('..' == $component) {
+                    array_pop($join);
+
+                    continue;
+                }
+
+                $join[] = $component;
+            }
+
+            $filesystem->setTarget(sprintf("%s/%s", $prefix, implode('/', $join)));
+        }
+
         $date = new \DateTime(sprintf("%s-%s-%s %s:%s", $year, $parts[5], $parts[6], $hours[0], $hours[1]));
 
         $filesystem
@@ -82,8 +109,10 @@ class FilesystemFactory implements FilesystemFactoryInterface
      */
     private function resolveFile($type)
     {
-        if ($type == 'd') {
+        if ('d' == $type) {
             return new Directory;
+        } elseif ('l' == $type) {
+            return new Symlink;
         } else {
             return new File;
         }

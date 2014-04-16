@@ -15,32 +15,6 @@ class FileDeleterTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException        Touki\FTP\Exception\DeletionException
-     * @expectedExceptionMessage Cannot delete file /foo as it doesn't exist
-     */
-    public function testProcessOnNonExistantFileThrowsException()
-    {
-        $wrapper = $this->getMockBuilder('Touki\FTP\FTPWrapper')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $wrapper
-            ->expects($this->never())
-            ->method('delete')
-        ;
-        $fetcher = $this->getMockBuilder('Touki\FTP\FilesystemFetcher')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $fetcher
-            ->expects($this->once())
-            ->method('findFileByName')
-            ->will($this->throwException(new NoResultException))
-        ;
-
-        $deleter = new FileDeleter(new File("/foo"));
-        $deleter->execute($wrapper, $fetcher);
-    }
-
-    /**
-     * @expectedException        Touki\FTP\Exception\DeletionException
      * @expectedExceptionMessage Couldn't delete file /foo
      */
     public function testProcessOnFailedInternalDeletionThrowsException()
@@ -56,10 +30,24 @@ class FileDeleterTest extends \PHPUnit_Framework_TestCase
         $fetcher = $this->getMockBuilder('Touki\FTP\FilesystemFetcher')
             ->disableOriginalConstructor()
             ->getMock();
-        $fetcher
+
+        $deleter = new FileDeleter(new File("/foo"));
+        $deleter->execute($wrapper, $fetcher);
+    }
+
+    public function testProcessSuccessDoesNothing()
+    {
+        $wrapper = $this->getMockBuilder('Touki\FTP\FTPWrapper')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $wrapper
             ->expects($this->once())
-            ->method('findFileByName')
+            ->method('delete')
+            ->will($this->returnValue(true))
         ;
+        $fetcher = $this->getMockBuilder('Touki\FTP\FilesystemFetcher')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $deleter = new FileDeleter(new File("/foo"));
         $deleter->execute($wrapper, $fetcher);

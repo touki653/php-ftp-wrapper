@@ -37,16 +37,6 @@ class FileDeleter implements CommandInterface
      */
     public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        try {
-            $fetcher->findFileByName($this->file->getRealpath());
-        } catch (NoResultException $e) {
-            throw new DeletionException(
-                sprintf("Cannot delete file %s as it doesn't exist", $this->file->getRealpath()),
-                $e->getCode(),
-                $e
-            );
-        }
-
         if (false === $wrapper->delete($this->file->getRealpath())) {
             throw new DeletionException(sprintf("Couldn't delete file %s", $this->file->getRealpath()));
         }
