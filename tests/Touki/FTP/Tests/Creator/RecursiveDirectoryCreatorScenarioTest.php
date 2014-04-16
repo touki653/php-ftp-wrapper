@@ -13,7 +13,6 @@ use Touki\FTP\Factory\PermissionsFactory;
  * Recursive directory creator scenario test case
  * Tests the RecursiveDirectoryCreator in a real scenario
  *
- *
  * @author Touki <g.vincendon@vithemis.com>
  */
 class RecursiveDirectoryCreatorScenarioTest extends ConnectionAwareTestCase

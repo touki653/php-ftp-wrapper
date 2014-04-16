@@ -5,7 +5,7 @@ namespace Touki\FTP;
 use Touki\FTP\Exception\ConnectionUnestablishedException;
 
 /**
- * Connection model
+ * Connection DTO
  *
  * @author Touki <g.vincendon@vithemis.com>
  */

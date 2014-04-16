@@ -6,7 +6,8 @@ use Touki\FTP\Model\File;
 use Touki\FTP\FTPWrapper;
 use Touki\FTP\FilesystemFetcher;
 use Touki\FTP\CommandInterface;
-use Touki\FTP\Exception\CreationException;
+use Touki\FTP\Exception\DeletionException;
+use Touki\FTP\Exception\NoResultException;
 
 /**
  * File deleter
@@ -36,10 +37,18 @@ class FileDeleter implements CommandInterface
      */
     public function execute(FTPWrapper $wrapper, FilesystemFetcher $fetcher)
     {
-        if (null === $fetcher->findFileByName($this->file->getRealpath())) {
-            return;
+        try {
+            $fetcher->findFileByName($this->file->getRealpath());
+        } catch (NoResultException $e) {
+            throw new DeletionException(
+                sprintf("Cannot delete file %s as it doesn't exist", $this->file->getRealpath()),
+                $e->getCode(),
+                $e
+            );
         }
 
-        
+        if (false === $wrapper->delete($this->file->getRealpath())) {
+            throw new DeletionException(sprintf("Couldn't delete file %s", $this->file->getRealpath()));
+        }
     }
 }
