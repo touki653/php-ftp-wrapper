@@ -179,7 +179,7 @@ class FTPFilesystemManager
         $directory = str_replace('\\', '/', $directory); // Issue #7
 
         if ($inDirectory) {
-            $name      = $inDirectory->getRealpath().$name;
+            $name      = sprintf("/%s", ltrim($inDirectory->getRealpath().$name, '/'));
             $directory = $inDirectory;
         }
 
@@ -212,7 +212,7 @@ class FTPFilesystemManager
         $directory = str_replace('\\', '/', $directory); // Issue #7
 
         if ($inDirectory) {
-            $name      = $inDirectory->getRealpath().$name;
+            $name      = sprintf("/%s", ltrim($inDirectory->getRealpath().$name, '/'));
             $directory = $inDirectory;
         }
 
@@ -245,7 +245,7 @@ class FTPFilesystemManager
         $directory = str_replace('\\', '/', $directory); // Issue #7
 
         if ($inDirectory) {
-            $name      = $inDirectory->getRealpath().$name;
+            $name      = sprintf("/%s", ltrim($inDirectory->getRealpath().$name, '/'));
             $directory = $inDirectory;
         }
 
@@ -273,6 +273,10 @@ class FTPFilesystemManager
     public function getCwd()
     {
         $path = $this->wrapper->pwd();
+
+        if ('/' === $path) {
+            return new Directory('/');
+        }
 
         return $this->findDirectoryByName($path);
     }

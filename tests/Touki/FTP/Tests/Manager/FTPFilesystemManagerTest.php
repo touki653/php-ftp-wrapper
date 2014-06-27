@@ -201,5 +201,10 @@ class FTPFilesystemManagerTest extends ConnectionAwareTestCase
         $this->assertEquals('/folder/subfolder', $dir->getRealpath());
 
         $this->wrapper->chdir('/');
+
+        $dir = $this->manager->getCwd();
+
+        $this->assertInstanceOf('Touki\FTP\Model\Directory', $dir);
+        $this->assertEquals('/', $dir->getRealpath());
     }
 }
