@@ -1,3 +1,9 @@
+1.1.3
+-----
+
+ * Fixed bug #7 - [dirname](http://php.net/dirname) for windows server returns `\` instead of `/`
+ * Fixed bug #11 - Invalid getCwd on root directory
+
 1.1.2
 -----
 
