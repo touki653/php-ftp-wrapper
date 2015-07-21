@@ -81,6 +81,10 @@ class FTPFilesystemManager
         foreach ($raw as $item) {
             $fs = $this->factory->build($item, $directory);
 
+            if ('/.' === substr($fs->getRealpath(), -2) || '/..' === substr($fs->getRealpath(), -3)) {
+                continue;
+            }
+
             if (true === call_user_func_array($callable, array($fs))) {
                 $list[] = $fs;
             }
@@ -156,6 +160,10 @@ class FTPFilesystemManager
 
         foreach ($raw as $item) {
             $fs = $this->factory->build($item, $directory);
+
+            if ('/.' === substr($fs->getRealpath(), -2) || '/..' === substr($fs->getRealpath(), -3)) {
+                continue;
+            }
 
             if (true === call_user_func_array($callable, array($fs))) {
                 return $fs;
