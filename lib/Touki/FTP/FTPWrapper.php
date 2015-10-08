@@ -79,7 +79,11 @@ class FTPWrapper
      */
     public function get($localFile, $remoteFile, $mode = self::BINARY, $resumepos = 0)
     {
-        return ftp_get($this->connection->getStream(), $localFile, $remoteFile, $mode, $resumepos);
+        try{
+            return ftp_get($this->connection->getStream(), $localFile, $remoteFile, $mode, $resumepos);
+        }catch (\Exception $e){
+            return ftp_get($this->connection->getStream(), $localFile, str_replace(' ', '\\ ', $remoteFile), $mode, $resumepos);
+        }
     }
 
     /**
