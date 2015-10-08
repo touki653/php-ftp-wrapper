@@ -79,29 +79,19 @@ class FTPFilesystemManager
             throw new DirectoryException(sprintf("Directory %s not found", $directory));
         }
 
-        if(is_array($raw)){
-            if(count($raw)){
-                foreach ($raw as $item) {
-                    $fs = $this->factory->build($item, $directory);
+        if(is_array($raw) && empty($raw)){
+            $raw       = $this->wrapper->rawlist(str_replace(' ', '\\ ', $directory));
+        }
 
-                    if ('/.' === substr($fs->getRealpath(), -2) || '/..' === substr($fs->getRealpath(), -3)) {
-                        continue;
-                    }
+        foreach ($raw as $item) {
+            $fs = $this->factory->build($item, $directory);
 
-                    if (true === call_user_func_array($callable, array($fs))) {
-                        $list[] = $fs;
-                    }
-                }
-            }else{
-                $raw = $this->wrapper->nlist($directory);
+            if ('/.' === substr($fs->getRealpath(), -2) || '/..' === substr($fs->getRealpath(), -3)) {
+                continue;
+            }
 
-                if ($raw && is_array($raw) && count($raw)) {
-                    foreach ($raw as $item) {
-                        if (substr($item, -4) == '.mp3') {
-                            $list[] = new \Touki\FTP\Model\File($directory . DIRECTORY_SEPARATOR . $item);
-                        }
-                    }
-                }
+            if (true === call_user_func_array($callable, array($fs))) {
+                $list[] = $fs;
             }
         }
 
@@ -173,35 +163,23 @@ class FTPFilesystemManager
             throw new DirectoryException(sprintf("Directory %s not found", $directory));
         }
 
-        if(is_array($raw)){
-            if(count($raw)){
-                foreach ($raw as $item) {
-                    $fs = $this->factory->build($item, $directory);
+        if(is_array($raw) && empty($raw)){
+            $raw       = $this->wrapper->rawlist(str_replace(' ', '\\ ', $directory));
+        }
 
-                    if ('/.' === substr($fs->getRealpath(), -2) || '/..' === substr($fs->getRealpath(), -3)) {
-                        continue;
-                    }
 
-                    if (true === call_user_func_array($callable, array($fs))) {
-                        return $fs;
-                    }
-                }
-            }else{
-                $raw = $this->wrapper->nlist($directory);
+        foreach ($raw as $item) {
+            $fs = $this->factory->build($item, $directory);
 
-                if ($raw && is_array($raw) && count($raw)) {
-                    foreach ($raw as $item) {
-                        if (substr($item, -4) == '.mp3') {
-                            $fs = new \Touki\FTP\Model\File($directory . DIRECTORY_SEPARATOR . $item);
+            if ('/.' === substr($fs->getRealpath(), -2) || '/..' === substr($fs->getRealpath(), -3)) {
+                continue;
+            }
 
-                            if (true === call_user_func_array($callable, array($fs))) {
-                                return $fs;
-                            }
-                        }
-                    }
-                }
+            if (true === call_user_func_array($callable, array($fs))) {
+                return $fs;
             }
         }
+
 
         return null;
     }
