@@ -26,9 +26,10 @@ class AnonymousConnection extends Connection
      * @param string  $host    FTP Server adress
      * @param integer $port    Port to connect to
      * @param integer $timeout Default timeout
+     * @param boolean $passive Setting to true will call ftp_pasv on connection open
      */
-    public function __construct($host, $port = 21, $timeout = 90)
+    public function __construct($host, $port = 21, $timeout = 90, $passive = false)
     {
-        parent::__construct($host, 'anonymous', 'guest', $port, $timeout);
+        parent::__construct($host, 'anonymous', 'guest', $port, $timeout, $passive);
     }
 }
