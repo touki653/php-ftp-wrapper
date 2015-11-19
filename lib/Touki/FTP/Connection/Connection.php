@@ -68,6 +68,12 @@ class Connection implements ConnectionInterface
     protected $connected = false;
 
     /**
+     * Whether it's a passive connection
+     * @var boolean
+     */
+    protected $passive = false;
+
+    /**
      * Constructor
      *
      * @param string  $host     The FTP server address
@@ -75,14 +81,16 @@ class Connection implements ConnectionInterface
      * @param string  $password Password to login with
      * @param integer $port     Specify the port to connect to
      * @param integer $timeout  Specify the default timeout
+     * @param boolean $passive  Setting to true will call ftp_pasv on connection open
      */
-    public function __construct($host, $username = 'anonymous', $password = 'guest', $port = 21, $timeout = 90)
+    public function __construct($host, $username = 'anonymous', $password = 'guest', $port = 21, $timeout = 90, $passive = false)
     {
         $this->host     = $host;
         $this->username = $username;
         $this->password = $password;
         $this->port     = $port;
         $this->timeout  = $timeout;
+        $this->passive  = $passive;
     }
 
     /**
@@ -112,6 +120,12 @@ class Connection implements ConnectionInterface
                 $this->getUsername(),
                 preg_replace("/./", "*", $this->getPassword())
             ));
+        }
+
+        if (true === $this->passive) {
+            if (false === ftp_pasv($stream, true)) {
+                throw new ConnectionException("Cold not turn on passive mode");
+            }
         }
 
         $this->connected = true;
