@@ -7,9 +7,9 @@ use Touki\FTP\Connection\Connection;
 use Touki\FTP\Connection\AnonymousConnection;
 use Touki\FTP\Connection\SSLConnection;
 
-$connection = new Connection('host', 'user', 'password');
-$connection = new AnonymousConnection('host');
-$connection = new SSLConnection('host', 'user', 'password');
+$connection = new Connection('host', 'username', 'password', $port = 21, $timeout = 90, $passive = false);
+$connection = new AnonymousConnection('host', $port = 21, $timeout = 90, $passive = false);
+$connection = new SSLConnection('host', 'username', 'password', $port = 21, $timeout = 90, $passive = false);
 
 $connection->open();
 
