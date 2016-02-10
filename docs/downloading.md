@@ -45,3 +45,18 @@ $ftp->download('/path/to/download/file1.txt', $file, $options);
 
 ?>
 ```
+
+You can send the file directly to the user's browser
+
+```php
+<?php
+    header("Pragma: ");
+    header('Content-type: "application/octet-stream"');
+    header('Set-Cookie: fileDownload=true; path=/');
+    header('Cache-Control: max-age=0', true);
+    header('Content-Disposition: attachment; filename="' . basename($file->getRealpath()) . '"');
+    header('Content-Length: '. $file->getSize());
+    
+    $ftp->download('php://output', $file);
+?>
+```
