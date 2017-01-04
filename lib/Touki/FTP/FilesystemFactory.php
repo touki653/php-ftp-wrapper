@@ -52,7 +52,10 @@ class FilesystemFactory implements FilesystemFactoryInterface
         $filesystem = $this->resolveFile($type);
         $permParts  = str_split(substr($parts[0], 1, 9), 3);
         $hours      = sscanf($parts[7], "%d:%d");
-        $name       = implode(' ', array_slice($parts, 8));
+
+        $nameStart = strpos($input, $parts[7]);
+        $nameStart += strlen($parts[7]) + 1;
+        $name = trim(substr($input, $nameStart));
 
         if (null === $hours[1]) {
             $year  = $hours[0];

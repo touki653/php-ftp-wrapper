@@ -71,11 +71,16 @@ class FTPFilesystemManager
         }
 
         $directory = '/'.ltrim($directory, '/');
+
         $raw       = $this->wrapper->rawlist($directory);
         $list      = array();
 
         if (false === $raw) {
             throw new DirectoryException(sprintf("Directory %s not found", $directory));
+        }
+
+        if(is_array($raw) && empty($raw)){
+            $raw       = $this->wrapper->rawlist(str_replace(' ', '\\ ', $directory));
         }
 
         foreach ($raw as $item) {
@@ -158,6 +163,11 @@ class FTPFilesystemManager
             throw new DirectoryException(sprintf("Directory %s not found", $directory));
         }
 
+        if(is_array($raw) && empty($raw)){
+            $raw       = $this->wrapper->rawlist(str_replace(' ', '\\ ', $directory));
+        }
+
+
         foreach ($raw as $item) {
             $fs = $this->factory->build($item, $directory);
 
@@ -169,6 +179,7 @@ class FTPFilesystemManager
                 return $fs;
             }
         }
+
 
         return null;
     }
