@@ -292,7 +292,7 @@ class FTPWrapper
      */
     public function rawlist($directory, $recursive = false)
     {
-        return ftp_rawlist($this->connection->getStream(), $directory, $recursive);
+        return ftp_rawlist($this->connection->getStream(), "-al " . $directory, $recursive);
     }
 
     /**
