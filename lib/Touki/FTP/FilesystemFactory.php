@@ -61,7 +61,7 @@ class FilesystemFactory implements FilesystemFactoryInterface
             $year = date('Y');
         }
 
-        $date = new \DateTime(sprintf("%s-%s-%s %s:%s", $year, $parts[5], str_pad($parts[6], 2, '0', STR_PAD_LEFT), $hours[0], $hours[1]));
+        $date = new \DateTime(sprintf("%d-%s-%02d %02d:%02d", $year, $parts[5], str_pad($parts[6], 2, '0', STR_PAD_LEFT), $hours[0], $hours[1]));
 
         $filesystem
             ->setRealpath(sprintf("%s/%s", $prefix, $name))
