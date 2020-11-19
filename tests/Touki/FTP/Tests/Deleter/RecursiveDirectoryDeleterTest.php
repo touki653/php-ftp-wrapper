@@ -11,7 +11,7 @@
  * @author  Touki <g.vincendon@vithemis.com>
  */
 
-namespace Touki\FTP\Tests\Deleter\FTP;
+namespace Touki\FTP\Tests\Deleter;
 
 use Touki\FTP\Deleter\RecursiveDirectoryDeleter;
 use Touki\FTP\Manager\FTPFilesystemManager;
