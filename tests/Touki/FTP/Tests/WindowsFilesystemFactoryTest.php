@@ -20,7 +20,7 @@ use Touki\FTP\WindowsFilesystemFactory;
  *
  * @author Touki <g.vincendon@vithemis.com>
  */
-class WindowsFileFactoryTest extends \PHPUnit_Framework_TestCase
+class WindowsFilesystemFactoryTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
